@@ -50,7 +50,7 @@ This project consists of Landing Page and Inventory System.
         ▪ Generate/ Print Product Report <br> 
     o Generate/ Print Product Information o Filter Product <br> 
 ❖ Sales Order Module <br> 
-    o View Sales Order <br> <br> 
+    o View Sales Order <br>
     o Add Sales Order <br> 
     o Manage Sales Order  <br> 
         ▪ Approve Sales Order <br> 
