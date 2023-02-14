@@ -11,74 +11,74 @@ This project consists of Landing Page and Inventory System.
 ## Features
 
 ❖ Security (Login Module)<br> 
-    &nbsp o Users can sign in by entering their username and password. The user will be  led to a portal corresponding to their user role. 
-    o The admin has the access to all parts of the system including all transactions.  While the staff will handle the transaction process but it has limited access to  the system. 
-❖ Dashboard Module 
-    o Organizes and displays Inventory Information in a way that is simple to read  and comprehend.  
-    o Stay updated on the inventory's low-in-stock/ critical stock levels. 
-    o Displays a graph that summarizes the monthly sales and purchases/expenses. 
-❖ Inventory Management
-    o The system provides the user with an interface that allows for simple inventory  management. Inventory management system also allows you to save time that  could otherwise be spent on something else. 
-❖ Report Generation 
-    o The system is capable of producing accurate system generated reports based  on data stored in the system database. 
-❖ Home Page 
-    o It was created with the goal of promoting business marketing. Customers are  directed to information about the store and how to contact the owner. 
-    o It has smart icons on the right side of the page that will take you to the store's  Facebook, Shopee, and Lazada pages. 
-❖ Supplier Module 
-    o View Supplier 
-    o Add Supplier 
-    o Manage Supplier 
-        ▪ Update Supplier 
-        ▪ Delete Supplier 
-    o Generate/ Supplier Information 
-    o Filter Supplier 
-❖ Category Module 
-    o View Category 
-    o Add Category
-    o Manage Category  
-        ▪ Update Category 
-        ▪ Delete Category 
-    o Generate/ Print Category Information o Filter Category 
-❖ Product Module 
-    o View Product 
-    o Add Product 
-    o Manage Product 
-        ▪ Update Product 
-        ▪ Delete Product 
-    o Manage Product Stock(s) 
-        ▪ Update Product Stock(s) 
-        ▪ Generate/ Print Product Report 
-    o Generate/ Print Product Information o Filter Product 
-❖ Sales Order Module 
-    o View Sales Order 
-    o Add Sales Order 
-    o Manage Sales Order  
-        ▪ Approve Sales Order 
-        ▪ Cancel Sales Order  
-    o Generate/ Print Sales Order Report 
-    o Filter Sales Order Report 
-❖ Report Module 
-    o Purchases Report 
-        ▪ View Purchases Report 
-        ▪ Generate/ Print Purchases Report 
-        ▪ Filter Purchases Report 
-    o Sales Report 
-        ▪ View Sales Report 
-        ▪ Generate/ Print Sales Report 
-        ▪ Filter Sales Information 
-    o Stock Adjustment Report (Pull-Out) 
-        ▪ View Stock Adjustment Report (Pull-Out) 
-        ▪ Filter Stock Adjustment Report (Pull-Out) 
-        ▪ Generate/ Print Stock Adjustment Report (Pull-Out) ❖ User Module 
-    o View User 
-    o Generate/ Print User List 
-    o Filter User Information 
-    o Add User
-    o Manage User 
-        ▪ Update User Information 
-        ▪ Update User Role 
-        ▪ Delete User 
-    o Generate List of User Records 
+    o Users can sign in by entering their username and password. The user will be  led to a portal corresponding to their user role. <br> 
+    o The admin has the access to all parts of the system including all transactions.  While the staff will handle the transaction process but it has limited access to  the system. <br> 
+❖ Dashboard Module <br> 
+    o Organizes and displays Inventory Information in a way that is simple to read  and comprehend.  <br> 
+    o Stay updated on the inventory's low-in-stock/ critical stock levels. <br> 
+    o Displays a graph that summarizes the monthly sales and purchases/expenses. <br> 
+❖ Inventory Management<br> 
+    o The system provides the user with an interface that allows for simple inventory  management. Inventory management system also allows you to save time that  could otherwise be spent on something else. <br> 
+❖ Report Generation <br> 
+    o The system is capable of producing accurate system generated reports based  on data stored in the system database. <br> 
+❖ Home Page <br> 
+    o It was created with the goal of promoting business marketing. Customers are  directed to information about the store and how to contact the owner. <br> 
+    o It has smart icons on the right side of the page that will take you to the store's  Facebook, Shopee, and Lazada pages. <br> 
+❖ Supplier Module <br> 
+    o View Supplier <br> 
+    o Add Supplier <br> 
+    o Manage Supplier <br> 
+        ▪ Update Supplier <br> 
+        ▪ Delete Supplier <br> 
+    o Generate/ Supplier Information <br> 
+    o Filter Supplier <br> 
+❖ Category Module <br> 
+    o View Category <br> 
+    o Add Category<br> 
+    o Manage Category  <br> 
+        ▪ Update Category <br> 
+        ▪ Delete Category <br> 
+    o Generate/ Print Category Information o Filter Category <br> 
+❖ Product Module <br> 
+    o View Product <br> 
+    o Add Product <br> 
+    o Manage Product <br> 
+        ▪ Update Product <br> 
+        ▪ Delete Product <br> 
+    o Manage Product Stock(s) <br> 
+        ▪ Update Product Stock(s) <br> 
+        ▪ Generate/ Print Product Report <br> 
+    o Generate/ Print Product Information o Filter Product <br> 
+❖ Sales Order Module <br> 
+    o View Sales Order <br> <br> 
+    o Add Sales Order <br> 
+    o Manage Sales Order  <br> 
+        ▪ Approve Sales Order <br> 
+        ▪ Cancel Sales Order  <br> 
+    o Generate/ Print Sales Order Report <br> 
+    o Filter Sales Order Report <br> 
+❖ Report Module <br> 
+    o Purchases Report <br> 
+        ▪ View Purchases Report <br> 
+        ▪ Generate/ Print Purchases Report <br> 
+        ▪ Filter Purchases Report <br> 
+    o Sales Report <br> 
+        ▪ View Sales Report <br> 
+        ▪ Generate/ Print Sales Report <br> 
+        ▪ Filter Sales Information <br> 
+    o Stock Adjustment Report (Pull-Out) <br> 
+        ▪ View Stock Adjustment Report (Pull-Out)<br> 
+        ▪ Filter Stock Adjustment Report (Pull-Out) <br> 
+        ▪ Generate/ Print Stock Adjustment Report (Pull-Out) ❖ User Module <br> 
+    o View User <br> 
+    o Generate/ Print User List <br> 
+    o Filter User Information <br> 
+    o Add User<br> 
+    o Manage User <br> 
+        ▪ Update User Information <br> 
+        ▪ Update User Role <br> 
+        ▪ Delete User <br> 
+    o Generate List of User Records <br> 
 
 
 ## Sample Screenshots
