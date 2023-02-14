@@ -10,7 +10,7 @@ This project consists of Landing Page and Inventory System.
 
 ## Features
 
-❖ Security (Login Module) 
+❖ Security (Login Module)<br> 
     o Users can sign in by entering their username and password. The user will be  led to a portal corresponding to their user role. 
     o The admin has the access to all parts of the system including all transactions.  While the staff will handle the transaction process but it has limited access to  the system. 
 ❖ Dashboard Module 
