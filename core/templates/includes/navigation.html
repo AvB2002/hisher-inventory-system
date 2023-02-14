@@ -1,0 +1,80 @@
+
+		{% load static %}
+		<div class="main-header">
+		
+			<!-- Logo Header -->
+			<div class="logo-header bg-secondary text-light">
+				
+				<a class="logo">
+					<img src="{% static 'assets/img/hisher_inventory_logo.png' %}" alt="navbar brand" class="mx-6" width="143" height="35">
+				</a>
+				<button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon">
+						<i class="text-light icon-menu"></i>
+					</span>
+				</button>
+				<button class="topbar-toggler more"><i class="text-light icon-options-vertical"></i></button>
+				<div class="nav-toggle">
+					<button class="btn btn-toggle toggle-sidebar">
+						<i class="text-light icon-options-vertical"></i>
+					</button>
+				</div>
+			</div>
+			<!-- End Logo Header -->
+
+			<!-- Navbar Header -->
+			<nav class="navbar navbar-header navbar-expand-lg bg-secondary-gradient">
+				
+				{% if request.user.is_authenticated %}
+				<div class="container-fluid">
+					<ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
+						<li class="nav-item dropdown hidden-caret">
+						<li class="nav-item dropdown hidden-caret d-flex">
+							<a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
+								<div class="d-flex">
+									<h4 class="m-0 p-0 mr-2 text-light mt-2">
+												hello!, <b>{{ request.user.username }}</b>
+									</h4>
+									<div class="avatar-sm">
+										<img src="{% if request.user.userprofile.avatar %}{{request.user.userprofile.avatar.url }}{% else %}{% static 'assets/img/no_profile.jpg' %}{% endif %}" alt="..." class="avatar-img rounded-circle shadow-sm">
+									</div>
+								</div>
+							</a>
+							<ul class="dropdown-menu dropdown-user">
+								<div class="dropdown-user-scroll scrollbar-outer">
+									<li>
+										<div class="user-box">
+											<div class="avatar-lg"><img src="{% if request.user.userprofile.avatar %}{{request.user.userprofile.avatar.url }}{% else %}{% static 'assets/img/no_profile.jpg' %}{% endif %}" alt="image profile" class="avatar-img rounded"></div>
+											<div class="u-text">
+												<h4>
+													{{ request.user.first_name }} {{ request.user.last_name }}
+													{% if request.user.is_superuser == 1 %} 
+														<h2 class="badge badge-pill badge-primary">Admin</h2>
+													{% else %}
+														<h2 class="badge badge-pill badge-info">Staff</h2>
+													{% endif %}
+												</h4>
+												<p class="text-muted">
+													{{ request.user.email }}
+												</p>
+											</div>
+										</div>
+									</li>
+									<li class="dropdown-profile">
+										<!--<div class="dropdown-divider"></div>
+										<a class="dropdown-item" href="#">My Profile</a>
+										<a class="dropdown-item" href="#">Account Setting</a>-->
+										<div class="dropdown-divider"></div>
+										<a class="dropdown-item" href="{% url 'logout' %}?next=/login">Logout</a>
+									</li>
+								</div>
+							</ul>
+						</li>
+					</ul>
+				</div>
+				{% endif %}
+
+			</nav>
+			<!-- End Navbar -->
+        </div>
+        

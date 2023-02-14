@@ -1,0 +1,124 @@
+		<!-- Sidebar -->
+		<div class="sidebar sidebar-style-2" data-background-color="dark">			
+			<div class="sidebar-wrapper scrollbar scrollbar-inner">
+				<div class="sidebar-content">
+
+				{% if request.user.is_authenticated %}	
+
+						{% url 'home' as home %}
+
+					<ul class="nav nav-primary">
+						<li class="nav-item {% if request.path == home %} active {% endif %}">
+							<a href="{% url 'home' %}">
+								<i class="fas fa-home"></i>
+								<p>Dashboard</p>
+							</a>
+						</li>
+						<li class="nav-section">
+							<span class="sidebar-mini-icon">
+								<i class="fa fa-ellipsis-h text-light"></i>
+							</span>
+							<h4 class="text-section text-light">Management</h4>
+						</li>
+
+						{% url 'manage-supplier' as manage_supplier %}
+
+						<li class="nav-item {% if request.path == manage_supplier %} active {% endif %}">
+							<a href="{% url 'manage-supplier' %}">
+								<i class="fas fa-address-book"></i>
+								<p>Supplier</p>
+							</a>
+						</li>
+						
+							{% url 'manage-category' as manage_category %}
+
+							<li class="nav-item {% if request.path == manage_category %} active {% endif %}">
+								<a href="{% url 'manage-category' %}">
+									<i class="fas fa-list-alt"></i>
+									<p>Category</p>
+								</a>
+							</li>
+
+						{% url 'manage-product' as manage_product %}
+
+						<li class="nav-item {% if request.path == manage_product %} active {% endif %}">
+							<a href="{% url 'manage-product' %}">
+							<i class="fas fa-boxes"></i>
+								<p>Product</p>
+							</a>
+						</li>
+
+						{% url 'add-sales-order' as add_sales_order %}
+						{% url 'manage-sales-order' as manage_sales_order %}
+						<li class="nav-item {% if request.path == add_sales_order or request.path == manage_sales_order  %} active {% endif %}">
+							<a data-toggle="collapse" href="#sales_order">
+								<i class="fas fa-shopping-basket"></i>
+								<p>Sales Order</p>
+								<span class="caret"></span>
+							</a>
+							<div class="collapse" id="sales_order">
+								<ul class="nav nav-collapse">
+									<li>
+										<a href="{% url 'add-sales-order' %}">
+											<span class="sub-item">Add Order</span>
+										</a>
+									</li>
+									<li>
+										<a href="{% url 'manage-sales-order' %}">
+											<span class="sub-item">Manage Order</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</li>
+
+						{% url 'purchases-report' as purchases_report %}
+						{% url 'sales-report' as sales_adj_report %}
+						{% url 'stock-adj-report' as stock_adj_report %}
+						{% if request.user.is_superuser == 1 %}
+						<li class="nav-item {% if request.path == purchases_report or request.path == sales_report or request.path == stock_adj_report  %} active {% endif %}">
+							<a data-toggle="collapse" href="#report">
+								<i class="fa fa-file"></i>
+								<p>Report</p>
+								<span class="caret"></span>
+							</a>
+							<div class="collapse" id="report">
+								<ul class="nav nav-collapse">
+									<li>
+										<a href="{% url 'purchases-report' %}">
+											<span class="sub-item">Purchases Report</span>
+										</a>
+									</li>
+									<li>
+										<a href="{% url 'sales-report' %}">
+											<span class="sub-item">Sales Report</span>
+										</a>
+									</li>
+									<li>
+										<a href="{% url 'stock-adj-report' %}">
+											<span class="sub-item">Stock Adjustment Report</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</li>
+						{% endif %}
+
+						{% if request.user.is_superuser == 1 %}
+							{% url 'manage-user' as manage_user %}
+
+							<li class="nav-item {% if request.path == manage_user %} active {% endif %}">
+								<a href="{% url 'manage-user' %}">
+									<i class="fas fa-users-cog"></i>
+									<p>User</p>
+								</a>
+							</li>
+						{% endif %}
+
+					</ul>
+				{% endif %}	
+				</div>
+			</div>
+		</div>
+        <!-- End Sidebar -->
+        

@@ -1,0 +1,875 @@
+{% extends "layouts/base.html" %} {% block title %} Manage User {% endblock %}
+<!-- Specific Page CSS goes HERE  --> {% block stylesheets %}
+{% load static %} 
+<link rel="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css" href="styles.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.3/css/select.dataTables.min.css">
+<link type="text/css" href="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/css/dataTables.checkboxes.css" rel="stylesheet" />
+<link rel="stylesheet" href="{% static 'assets/css/manage-style.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.2.6/css/fileinput-rtl.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.2.6/css/fileinput.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.css">
+<link rel="stylesheet" href="{% static 'assets/css/manage-style.css' %}">
+<style>
+    div.file-footer-buttons{
+    display: none;
+    }
+    button.fileinput-remove-button{
+    background-color:#F25A62 !important;
+    }
+    div>select{
+    width:100% !important;
+    }
+</style> {% endblock stylesheets %} {% block content %} <div class="content">
+    <div class="page-inner">
+        <div class="page-header">
+            <div class="mr-2">
+                <h1 class="fw-bold m-0">User</h1>
+                <h3 class="text-dark op-8 mt-0">Manage User</h3>
+            </div>
+            <ul class="breadcrumbs card mt-2 p-3 mb-0">
+                <li class="nav-home"> <a href="{% url 'home' %}"> Dashboard </a> </li>
+                <li class="separator"> <i class="flaticon-right-arrow"></i> </li>
+                <li class="nav-item"> <a href="{% url 'manage-user' %}" class="badge badge-secondary text-light">User (Manage User)</a> </li>
+            </ul>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card p-3">
+                    <div class="d-flex align-items-center"> <span class="stamp stamp-md bg-dark mr-3 rounded-circle"> <i class="fas fa-users-cog text-white"></i> </span>
+                        <div>
+                            <h5 class="mb-1"><b>System User(s)</b></h5> <small class="text-muted"><a id="userCount"></a> registered</small>
+                        </div>
+                    </div>
+                    <div class="mt-3 mb-0 card card-dark bg-secondary-gradient">
+                        <div class="card-body pb-0">
+                            <div id="newDate" class="badge badge-light fw-bold float-right"></div>
+                            <h2 id="newSuppliers"></h2>
+                            <p>New User(s)</p>
+                            <div class="pull-in sparkline-fix chart-as-background">
+                                <div id="lineChart5"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-lg-flex justify-content-between">
+                            <div class="btn-group d-md-flex justify-content-center">
+                                <div class="row">
+                                    <div class="d-flex">
+                                        <div class="btn-group" role="group" aria-label="Basic example"> <button id="export" type="button" class="ml-3 btn border-dark btn-light btn-ripple p-3 " data-toggle="dropdown" aria-expanded="false" onclick="this.blur();" style="cursor:default;"> <i class="fas fa-file-export"></i> Export <i class="fas fa-caret-down"></i> </button>
+                                            <div class="dropdown-menu">
+                                                <div id="csv" class="dropdown-item"></div>
+                                                <div id="pdf" class="dropdown-item"></div>
+                                            </div> <button id="print"></button> <button id="delete" type="button" class="btn border-dark btn-light btn-ripple" onclick="deleteUser();" style="cursor:default;"> <i class="fas fa-trash-alt"></i> Delete </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div> <a id="addSupplier" role="button" data-toggle="modal" data-target="#addModal" class="w-100 mt-2 btn btn-success btn-ripple text-white"><i class="fas fa-plus"></i> Add User</a> </div>
+                        </div>
+                    </div>
+                    <div class="card mb-0">
+                        <div class="card-body border-bottom border-secondary p-2">
+                            <div class="d-lg-flex">
+                                <div class="pl-0 pr-4 ml-1 col-12 col-md-5 col-lg-5 form-group">
+                                    <form autocomplete="off" class="mt-1 ml-3 mr-md-1">
+                                        <div class="input-icon">
+                                            <div class="has-clear"> <span class="input-icon-addon"> <span class="fas fa-search"></span> </span> <input type="text" id="search" placeholder="Search for..." class="form-control input-sm" size="50%"> <span class="form-control-clear fa fa-times form-control-feedback d-none"></span> </div>
+                                        </div> <span class="text-secondary">Press Enter to search..</span>
+                                    </form>
+                                </div>
+                                <div id="page-length" class="ml-4 ml-lg-0"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-0 mt-0 card-body p-2">
+                        <div class="mt-2 ml-3 badge bg-gray-200"> <b class="mr-2">Status: </b> <b class="mr-2"><i class="text-green-600 fa fa-circle" aria-hidden="true"></i> - Active</b> <b class="mr-2"><i class="text-gray-500 fa fa-circle" aria-hidden="true"></i> - Inactive</b> </div>
+                        <div class="mt-2 ml-3 badge bg-gray-200"> <b class="mr-2">Role: </b> <b class="mr-2"><i class="text-primary fa fa-circle" aria-hidden="true"></i> - Admin</b> <b class="mr-2"><i class="text-info fa fa-circle" aria-hidden="true"></i> - Staff</b> </div>
+                        <div class="pt-0 mt-0 table-responsive">
+                            <table id="basic-datatables" class="table-loader display responsive table  text-wrap shadow">
+                                <thead>
+                                    <tr class="bg-dark text-light">
+                                        <th class="all"></th>
+                                        <th class="all">ID</th>
+                                        <th class="all">Avatar</th>
+                                        <th class="desktop">First Name</th>
+                                        <th class="desktop">Last Name</th>
+                                        <th class="mobile-p">Username</th>
+                                        <th class="mobile-p">Password</th>
+                                        <th class="mobile-p">Gender</th>
+                                        <th class="all">Email</th>
+                                        <th class="mobile-p">Phone Number</th>
+                                        <th class="mobile-p">Date Joined</th>
+                                        <th class="all">Role</th>
+                                        <th class="all">Status</th>
+                                        <th class="all">Edit</th>
+                                        <th class="all"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="basic-datatables-body"> </tbody>
+                            </table>
+                        </div>
+                        <div id="pagination-card" class="mt-2 d-flex justify-content-center"></div>
+                        <div id="info-card" class="d-flex justify-content-center mb-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal animated slideInUp" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="exampleModalLabel">Edit User</h2> <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editform" method="post" enctype="multipart/form-data" autocomplete="off" data-parsley-validate> {% csrf_token %} <div class="row">
+                            <div class="col-md-12 col-lg-12">
+                                <ul class="ml-2 nav nav-pills nav-secondary nav-pills-no-bd" id="pills-tab-without-border" role="tablist">
+                                    <li class="nav-item"> <a class="nav-link active" id="pills-user_info-tab-nobd" data-toggle="pill" href="#pills-user_info-nobd" role="tab" aria-controls="pills-user_info-nobd" aria-selected="true" onclick="$('#clear1').click();">User Information</a> </li>
+                                    <li class="nav-item"> <a class="nav-link" id="pills-change_pass-tab-nobd" data-toggle="pill" href="#pills-change_pass-nobd" role="tab" aria-controls="pills-change_pass-nobd" aria-selected="false" onclick="$('#clear1').click();">Change Password</a> </li>
+                                </ul>
+                                <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+                                    <div class="tab-pane fade show active" id="pills-user_info-nobd" role="tabpanel" aria-labelledby="pills-user_info-tab">
+                                        <div class="form-group"> <label for="id" class="placeholder">Id <span class="text-danger">*</span></label> <input type="text" id="id" name="id" class="form-control" readonly> </div>
+                                        <div class="form-group"> <label for="avatar" class="placeholder">Avatar <small>(optional)</small></label> {{ form1.avatar }} </div>
+                                        <div class="form-group"> <label for="username" class="placeholder">Username <span class="text-danger">*</span></label> <input type="text" id="username" name="username" class="form-control" readonly> </div>
+                                        <div class="form-group"> <label for="firstname" class="placeholder">First Name <span class="text-danger">*</span></label> {{ form2.first_name }} </div>
+                                        <div class="form-group"> <label for="lastname" class="placeholder">Last Name <span class="text-danger">*</span></label> {{ form2.last_name }} </div>
+                                        <div class="form-group"> <label for="email" class="placeholder">Email <span class="text-danger">*</span></label> {{ form2.email }} </div>
+                                        <div class="form-group"> <label for="phonenum" class="placeholder">Phone Number <small>(Optional)</small></label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend"> <span class="input-group-text" id="basic-addon1">+63</span> </div> {{ form1.phonenum }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="form-control role"> <label for="role" class="border-bottom w-100 border-danger placeholder">Role <span class="text-danger">*</span></label> <select id="role" required>
+                                                    <option value="">---------</option>
+                                                    <option value="Admin">Admin</option>
+                                                    <option value="Staff">Staff</option>
+                                                </select> </div>
+                                        </div>
+                                        <div class="form-group"> <label for="is_active" class="placeholder mr-1">Active <span class="text-danger">*</span></label> {{ form.is_active }} </div>
+                                    </div>
+                                    <div class="tab-pane fade show" id="pills-change_pass-nobd" role="tabpanel" aria-labelledby="pills-change_pass-tab">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group"> <label for="password1" class="placeholder">New Password <span class="text-danger">*</span></label> <input type="password" id="password1" name="password1" class="form-control" data-parsley-equalto="#password2" data-parsley-minlength="[8]" data-parsley-uppercase="1" data-parsley-lowercase="1" data-parsley-number="1" data-parsley-special="1"> </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group"> <label for="password2" class="placeholder">Confirm New Password <span class="text-danger">*</span></label> <input type="password" id="password2" name="password2" class="form-control" data-parsley-equalto="#password1" data-parsley-required-if="#password1"> </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group"> <label for="confpassword1" class="placeholder">Password <span class="text-danger">*</span></label> <input type="password" id="confpassword1" name="confpassword1" class="form-control" data-parsley-equalto="#confpassword2" data-parsley-uppercase="1" data-parsley-lowercase="1" data-parsley-number="1" data-parsley-special="1"> </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group"> <label for="confpassword2" class="placeholder">Confirm Password <span class="text-danger">*</span></label> <input type="password" id="confpassword2" name="confpassword2" class="form-control" data-parsley-equalto="#confpassword1"> </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer"> <button type="submit" class="btn btn-success btn-ripple">Submit</button> <button type="button" id="clear1" class="btn btn-danger btn-ripple">Reset</button> <button id="cancel" type="button" class="btn bg-gray-500 text-white btn-ripple" data-dismiss="modal">Cancel</button> </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated slideInUp" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">Add User</h2> <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+            </div>
+            <div class="modal-body">
+                <form id="addform" method="post" enctype="multipart/form-data" autocomplete="off" data-parsley-validate> {% csrf_token %} <div class="row">
+                        <div class="col-md-12 col-lg-12">
+                            <div class="form-group"> <label for="avatar" class="placeholder">Avatar <small>(optional)</small></label> {{ form1.avatar }} </div>
+                            <div class="form-group"> <label for="username" class="placeholder">Username <span class="text-danger">*</span></label> {{ form.username }} </div>
+                            <div class="form-group"> <label for="firstname" class="placeholder">First Name <span class="text-danger">*</span></label> {{ form.first_name }} </div>
+                            <div class="form-group"> <label for="lastname" class="placeholder">Last Name <span class="text-danger">*</span></label> {{ form.last_name }} </div>
+                            <div class="form-group"> <label for="gender" class="placeholder">Gender <span class="text-danger">*</span></label>
+                                <div class="form-check d-flex flex-row ml-2"> {% for gender in form1.gender %} <div class="mr-5"> <span class="form-check-input">{{ gender.tag }}</span> {{ gender.choice_label }} </div> {% endfor %} </div>
+                            </div>
+                            <div class="form-group"> <label for="email" class="placeholder">Email <span class="text-danger">*</span></label> {{ form.email }} </div>
+                            <div class="form-group"> <label for="phonenum" class="placeholder">Phone Number <small>(Optional)</small></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"> <span class="input-group-text" id="basic-addon1">+63</span> </div> {{ form1.phonenum }}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-control role"> <label for="role" class="border-bottom w-100 border-danger placeholder">Role <span class="text-danger">*</span></label> <select id="role" required>
+                                        <option value="">---------</option>
+                                        <option value="Admin">Admin</option>
+                                        <option value="Staff">Staff</option>
+                                    </select> </div>
+                            </div>
+                            <div class="form-group"> <label for="is_active" class="placeholder mr-1">Active <span class="text-danger">*</span></label> {{ form.is_active }} </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group"> <label for="a-password1" class="placeholder">Password <span class="text-danger">*</span></label> {{ form.password1 }} </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group"> <label for="a-password2" class="placeholder">Confirm Password <span class="text-danger">*</span></label> {{ form.password2 }} </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer"> <button type="submit" class="btn btn-success btn-ripple">Submit</button> <button type="button" id="clear" class="btn btn-danger btn-ripple">Clear</button> <button id="cancel" type="button" class="btn bg-gray-500 text-white btn-ripple" data-dismiss="modal">Cancel</button> </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div> {% endblock content %}
+<!-- Specific Page JS goes HERE  --> {% block javascripts %} <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.2.6/js/fileinput.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.11.3/dataRender/datetime.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.10.21/dataRender/datetime.js"></script>
+<script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+<script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/js/dataTables.checkboxes.min.js"></script>
+<script>
+    var table;
+    		$(document).ready(function() {
+    
+    			lightbox.option({
+    				'resizeDuration': 500,
+    				'wrapAround': true,
+    				'disableScrolling': true,
+    				'fitImagesInViewport': true
+    			  })
+    
+    			table = $('#basic-datatables').DataTable({
+    				bServerSide: true,
+    					"lengthMenu": [[10, 25, 50, 100, 500, 999999], [10, 25, 50, 100, 500, "All"]],
+    					"pageLength": 999999,
+    				sAjaxSource: "{% url 'user-list' %}",  	
+                                        columns: [
+    										{name: "checkbox", data: null, defaultContent:""},
+    										{name: "id", data: 0},	
+    										{name: "avatar", data: 1, 
+    										   "render": function (data, type, row) {
+    											   if(data==null || data==''){return '<a><img src="{% static 'assets/img/no_image.png' %}" alt="image" width="80" height="80"></a>'}else{var path=data.split('manage/user/');return '<a href="{{ cloudinary_url }}'+path[0]+'" data-lightbox="profile"><img src="{{cloudinary_url}}'+path[0]+'"alt="image" class="img-thumbnail" width="80" height="80"></a>'}}},
+    										   {name: "first_name", data: 2},
+    										   {name: "last_name", data: 3},
+    											   {name: "username", data: 4},
+    											   {name: "password", data: 5},
+    										   {name: "gender", data: 6},
+    										   {name: "email", data: 7},
+    										   {name: "phone_num", data: 8,
+    										   "render": function (data, type, row) {
+    											if (data.trim()=='') {
+													return '<div class="badge-pill badge-danger w-20 text-center">None</div>';
+    											}
+    											else{
+    												return "+63"+data;
+    											}
+    										}},
+    										   {name: "date_joined", data: 9, "render": function (data, type, row) {return moment(data).format('DD MMM YYYY hh:mm a');}},
+    											   {name: "role", data: 10,
+    										   "render": function (data, type, row) {if(data==true){return '<h5 class="badge-pill bg-primary text-light text-center">Admin</h5>'}else{return '<h5 class="badge-pill bg-info text-light text-center">Staff</h5>'}},},
+    										   {name: "is_active", data: 11,
+    										   "render": function (data, type, row) {if(data==true){return '<h5 class="badge-pill bg-green-600 text-light text-center">Active</h5>'}else{return '<h5 class="badge-pill bg-gray-500 text-light text-center">Inactive</h5>'}},},
+    										   {name: "edit", data: 0,
+    										   "render": function (data, type, row) {return '<div class="btn-group d-md-flex justify-content-center"><button id="user-'+data+'" class="btn btn-warning btn-ripple pl-2 pr-2 p-2" type="button" data-toggle="modal" data-target="#editModal" onclick=editUser("#user-'+data+'");>'
+    														   +'<i class="fas fa-edit"></i>'}},
+    									   	   {name: "details-control", data: null, defaultContent:""},
+                                            ],
+    				responsive: {
+    					details: {
+    						type: 'column',
+    						target: -1
+    					}
+    				},
+    				autoWidth: false,
+    				 columnDefs: [ 	
+    				 	{
+    						width : "1%",	
+    						targets: [ 0 ],
+    						'checkboxes': {
+    							'selectRow': true
+    						}
+    					},
+    					{	
+    						width : "5%",	
+    						targets: [ 1 ],
+    						orderData: [ 0 ]
+    					},
+    					{
+    						width : "10%",	
+    						targets: [ 2 ],
+    						'orderable': false,	
+    					},
+    					{
+    						width : "20%",	
+    						targets: [ 3 ],
+    						orderData: [ 2 ]
+    					},
+    					{
+    						width : "20%",	
+    						targets: [ 4 ],
+    						orderData: [ 3 ]
+    					},
+    					{
+    						width : "20%",	
+    						targets: [ 5 ],
+    						orderData: [ 4 ],
+    						'orderable': false,	
+    					},
+    					{
+    								
+    						targets: [ 6 ]  
+    					},
+    					{
+    						targets: [ 7 ],
+    						'orderable': false,	
+    					},
+    					{
+    					targets: [ 8 ],
+    						'orderable': false,	
+    					},
+    					{
+    						width:"4%",
+    						targets: [ 9 ],
+    						'orderable': false,	
+    					},
+    					{
+    						width:"2%",
+    						className: 'dtr-control',
+    						orderable: false,
+    						targets:   -1
+    				},
+    				],
+    				select: {
+           					 style: 'multi',
+    						 selector: 'tr td:first-child',
+    						 info: false
+       				},
+    				buttons: {
+    								buttons: [
+    									{ extend: 'print', className: '',
+    									text: 'Print',
+    									exportOptions: {
+    										stripHtml : false,
+    										columns: [1, 3, 4, 5, 7, 8, 9, 10, 11],
+    											rows: { selected: true }
+    										},customize: function (win) {
+												var last = null;
+												var current = null;
+												var bod = [];
+								 
+												var css = '@page { size: landscape; }',
+													head = win.document.head || win.document.getElementsByTagName('head')[0],
+													style = win.document.createElement('style');
+								 
+												style.type = 'text/css';
+												style.media = 'print';
+								 
+												if (style.styleSheet)
+												{
+												  style.styleSheet.cssText = css;
+												}
+												else
+												{
+												  style.appendChild(win.document.createTextNode(css));
+												}
+								 
+												head.appendChild(style);
+										}
+									},
+    									{ extend: 'csv', className: 'btn',
+    									exportOptions: {
+    										stripHtml : false,
+    										columns: [1, 3, 4, 5, 7, 8, 9, 10, 11],
+    										}
+    									},
+    									{ extend: 'pdfHtml5', 
+    									className: 'btn',
+    									orientation: 'landscape',
+										pageSize : 'A1',
+    									exportOptions: {
+    										stripHtml : true,
+    										columns: [1, 3, 4, 5, 7, 8, 9, 10, 11],
+    										},
+    									customize: function(doc) {
+    										doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+    										doc.defaultStyle.alignment = 'center';
+    										doc.styles.tableHeader.alignment = 'center';
+    									},
+    									}
+    								]
+    							},
+    							  dom: "<'row p-2'<'col-lg-12' l B>>" +
+    									"<'row'<'col-lg-12'tr>>" +
+    									"<'row p-2'<'col-lg-5'i><'col-lg-7'p>>",
+    						initComplete: function(settings, json) {
+    							
+    					
+    							//if(rowCount < 1){
+    								//$('#export').attr('disabled','disabled');
+    								//$('.buttons-print').attr('disabled','disabled');
+    							//}
+    							//else {
+    								//$('#export').removeAttr('disabled');
+    								//$('.buttons-print').removeAttr('disabled');
+    							//}
+    							$('#export').attr('disabled','disabled');
+    							$('.buttons-print').attr('disabled','disabled');
+    							$('#delete').attr('disabled','disabled');
+    
+    							$(".buttons-print").appendTo("#print");
+    							
+    							$(".buttons-print").addClass("btn border-dark btn-light btn-ripple p-3 rounded-0 h-100");
+    							$(".buttons-csv").appendTo("#csv");
+    							$(".buttons-pdf").appendTo("#pdf");
+    							$(".select-info .select-item:nth-child(1)").addClass("badge badge-primary text-light");
+    							
+    							$("#basic-datatables_length").appendTo("#page-length");
+    							$("#basic-datatables_paginate").appendTo("#pagination-card");
+    							$("#basic-datatables_info").appendTo("#info-card");
+    							$('.buttons-print').html('<i class="fas fa-print"></i> Print');
+    			
+    							$("tr th:nth-child(2)").click();
+    							$("#userCount").html( this.fnSettings().fnRecordsTotal());
+    						},
+    					 "drawCallback": function( settings ) {
+    								$(function () {
+    				$.ajax({
+    					type: "GET",
+    					url: "{% url 'user-graph' %}",  
+    					success: function (data) {
+    						var arr=[];
+    						var total=0;
+    						$.each(data.cdc, function(key, value) {
+    							total=total+value;
+    							arr.push(total);
+    						});
+    						$('#lineChart5').sparkline(arr, {
+    							type: 'line',
+    							height: '70',
+    							width: '100%',
+    							lineWidth: '2',
+    							lineColor: 'rgba(255, 255, 255, .5)',
+    							fillColor: 'rgba(255, 255, 255, .15)'
+    						});
+    						if(data.count!=0){
+    							$('#newDate').html("As of "+moment(data.date[data.date.length-1]).format('MMMM DD,YYYY'));
+    							$('#newSuppliers').html(data.cdc[data.cdc.length-1]);
+    							$("#userCount").html(data.count);
+    						}
+    						else{
+    							$('#newDate').html("As of "+moment(data.date[data.date.length-1]).format('MMMM DD,YYYY'));
+    							$('#newSuppliers').html("0");
+    							$("#userCount").html(data.count);
+    						}
+    					}
+    				});
+    					
+    			});
+    			
+    							var searchCount=table.rows( {search:'applied'} ).count()
+    							if(searchCount < 1){
+    								$('#export').attr('disabled','disabled');
+    								$('#delete').attr('disabled','disabled');
+    								$('#delete').removeClass('btn-danger');
+    								$('#delete').addClass('btn-light');
+    								$('.buttons-print').attr('disabled','disabled');
+    								$('.buttons-print').html('<i class="fas fa-print"></i> Print');
+    								$('#delete').html('<i class="fas fa-trash-alt"></i> Delete');
+    							}
+    					}
+            });
+
+			$(document).bind({
+				ajaxStart: function() {NProgress.start();},
+				ajaxStop: function() {NProgress.done();}
+			 }); 
+
+
+    		table.on( 'draw.dt', function() {
+    				setTimeout(function(){
+    					NProgress.done();
+    			   $("#basic-datatables").removeClass('table-loader').show();
+    			}, 400);});
+    			table.on( 'preDraw', function () {
+    				NProgress.start();
+    				  $("#basic-datatables").addClass('table-loader').show();
+    			} );
+
+    		table.on("select deselect",function(){
+    			selectedRows = table.rows({ selected: true }).count();
+    			if(selectedRows < 1){
+    				$('#export').attr('disabled','disabled');
+    				$('#delete').attr('disabled','disabled');
+    				$('#delete').removeClass('btn-danger');
+    				$('#delete').addClass('btn-light');
+    				$('.buttons-print').attr('disabled','disabled');
+    				$('.buttons-print').html('<i class="fas fa-print"></i> Print');
+    				$('#delete').html('<i class="fas fa-trash-alt"></i> Delete');
+    
+    			}
+    			else{
+    				rselected=table.rows('.selected').data();
+    				$('#export').removeAttr('disabled');
+    				$('#delete').removeAttr('disabled');
+    				$('#delete').addClass('btn-danger');
+    				$('#delete').removeClass('btn-light');
+    				$('.buttons-print').removeAttr('disabled');
+    				$('.buttons-print').html('<i class="fas fa-print"></i> Print <span class="badge badge-success text-light">'+selectedRows+'</span> selected row(s)');
+    				$('#delete').html('<i class="fas fa-trash-alt"></i> Delete <span class="badge badge-light text-danger">'+selectedRows+'</span> selected row(s)');
+    			}
+    		});
+    
+    		$('#search').keypress(function(e){
+    			if(e.which == 13) {
+    				e.preventDefault()
+    				table.search($(this).val()).draw();
+    			   }
+    	   });
+    	$('#search').keyup(function(e){ 
+    		if(e.which  == 8) {
+    			e.preventDefault()
+    			table.search($(this).val()).draw();
+    		   }
+    	});
+    		var selectedRows=0;
+    
+    		$(".alert-del").click(function(){
+    			$(this).parent().addClass('hidden');
+    		}); 
+    		$("#clear").click(function(){
+    				$('#addform').find('.fileinput-remove').click();
+    			$('#addform').trigger("reset");
+    			$("#addform").find("ul.parsley-errors-list").remove();
+    			$('#addform').parsley().reset();
+    		}); 
+    		$("#clear1").click(function(){
+    				$('#editform').find('.fileinput-remove').click();
+    			$("#editform").find("ul.parsley-errors-list").remove();
+    				$('#editform').find('#first_name').val(first_name);
+    				$('#editform').find('#last_name').val(last_name);
+    				$('#editform').find('#username').val(username);
+    				$('#editform').find('#email').val(email);
+    				$('#editform').find('div.role option[value="'+role+'"]').prop('selected', true);	   
+    				$('#editform').find('#password1').val('');
+    				$('#editform').find('#password2').val('');
+    				$('#editform').find('#confpassword1').val('');
+    				$('#editform').find('#confpassword2').val('');
+    				if(phonenum=="None"){
+    					$('#editform').find('#phonenum').val("");
+    				}
+    				else{
+    					$('#editform').find('#phonenum').val(phonenum);
+    				}
+    
+    				if(is_active=="Active"){
+    					$('#id_is_active').prop('checked',true)
+    				}
+    				else{
+    					$('#id_is_active').prop('checked', false);
+    				}
+    			$("#editModal").find(".form-control").removeClass('parsley-error');
+    			$('#editform').parsley().reset();
+    		}); 
+    		$("#addSupplier").click(function (e) {
+    			e.preventDefault();
+    			$("#clear").click();
+    		});
+    		  $("#addform").submit(function (e) {
+    				e.preventDefault();
+    			  if (confirm('Are you sure you want to add this information to the database?')) {
+						$('#ajax-loader').addClass('loading').show();
+    					var $role = $('#addform').find('#role option:selected').val();
+    					var serializedData = new FormData(this);
+    					serializedData.append("role", $role)
+    
+    					
+    					$.ajax({
+    						type: 'POST',
+    						url: "{% url 'insert-user' %}",
+    						data: serializedData,
+    						processData: false,
+    						contentType: false,
+    						// handle a successful response
+    						success: function (response) {
+    							// On successful, clear all form data
+								$('#ajax-loader').removeClass('loading').hide();
+    							$("#addModal").find("#name").blur();
+    							$("#addModal").find("#email").blur();
+    							$("#addModal").find("#phonenum").blur();
+    							table.ajax.reload();
+    							$("#addform").find("#clear").click();
+    							swal("Success!",JSON.stringify('User was succesfully saved in the database!') , {
+    								icon : "success",
+    								buttons: {        			
+    									confirm: {
+    										className : 'btn btn-success'
+    									}
+    								},
+    							});
+    							},
+    						error: function (response) {
+    							// alert non successful response
+								$('#ajax-loader').removeClass('loading').hide();
+    							swal("Error!",JSON.stringify(response["responseJSON"]["error"]) , {
+    								icon : "error",
+    								buttons: {        			
+    									confirm: {
+    										className : 'btn btn-danger'
+    									}
+    								},
+    							});
+    			
+    					}
+    				});
+    			   } 
+    		  });
+    		$('#addform').parsley();
+    		$('#editform').parsley();
+    			//has uppercase
+    			window.Parsley.addValidator('uppercase', {
+    				requirementType: 'number',
+    				validateString: function(value, requirement) {
+    				var uppercases = value.match(/[A-Z]/g) || [];
+    				return uppercases.length >= requirement;
+    				},
+    				messages: {
+    				en: 'Your password must contain at least (%s) uppercase letter.'
+    				}
+    			});
+    			
+    			//has lowercase
+    			window.Parsley.addValidator('lowercase', {
+    				requirementType: 'number',
+    				validateString: function(value, requirement) {
+    				var lowecases = value.match(/[a-z]/g) || [];
+    				return lowecases.length >= requirement;
+    				},
+    				messages: {
+    				en: 'Your password must contain at least (%s) lowercase letter.'
+    				}
+    			});
+    			
+    			//has number
+    			window.Parsley.addValidator('number', {
+    				requirementType: 'number',
+    				validateString: function(value, requirement) {
+    				var numbers = value.match(/[0-9]/g) || [];
+    				return numbers.length >= requirement;
+    				},
+    				messages: {
+    				en: 'Your password must contain at least (%s) number.'
+    				}
+    			});
+    			
+    			//has special char
+    			window.Parsley.addValidator('special', {
+    				requirementType: 'number',
+    				validateString: function(value, requirement) {
+    				var specials = value.match(/[^a-zA-Z0-9]/g) || [];
+    				return specials.length >= requirement;
+    				},
+    				messages: {
+    				en: 'Your password must contain at least (%s) special characters.'
+    				}
+    			});
+    			
+    		$("#editform").submit(function (e) {
+    			e.preventDefault();
+    			  if (confirm('Are you sure you want to update this information to the database?')) {
+							$('#ajax-loader').addClass('loading').show();
+    						var $role = $('#editform').find('#role option:selected').val();
+    						var $confpassword1 = $('#editform').find('#confpassword1').val();
+    						var $confpassword2 = $('#editform').find('#confpassword2').val();
+    						var serializedData = new FormData(this);
+    						serializedData.append("role", $role);
+    						serializedData.append("confpassword1", $confpassword1);
+    						serializedData.append("confpassword2", $confpassword2);
+    						// Ajax Call
+    						$.ajax({
+    							type: 'POST',
+    							url: "{% url 'update-user' %}",
+    							data: serializedData,
+    							processData: false,
+    							contentType: false,
+    
+    						success: function(data) {
+    								// On successful, clear all form data
+										$('#ajax-loader').removeClass('loading').hide();
+    									$("#editModal").find('#id').blur();
+    									$("#editModal").find('#first_name').blur();
+    									$("#editModal").find('#last_name').blur();
+    									$("#editModal").find('#username').blur();
+    									$("#editModal").find('#email').blur();
+    
+    									id = $("#editform").find("#id").val();   
+    									first_name = $("#editform").find("#first_name").val();   
+    									last_name =$("#editform").find("#last_name").val();   
+    									username = $("#editform").find("#username").val();   
+    									email = $("#editform").find("#email").val();   
+    									phonenum = $("#editform").find("#phonenum").val();   
+    									role = $("#editform").find("#role").val();   
+    									if($('#editform').find('#id_is_active').is(':checked')){
+    										is_active="Active"
+    									}
+    									else{
+    										is_active="Inactive"
+    									} 
+    
+    									$('#editform').find('#password1').val('');
+    									$('#editform').find('#password2').val('');
+    									$('#editform').find('#confpassword1').val('');
+    									$('#editform').find('#confpassword2').val('');
+    									
+    								table.ajax.reload();   
+    								swal("Success!",JSON.stringify('User was succesfully updated in the database!') , {
+    								icon : "success",
+    								buttons: {        			
+    									confirm: {
+    										className : 'btn btn-success'
+    									}
+    								},
+    							}); 
+    							},
+    						error: function (response) {
+    							// alert non successful response
+							$('#ajax-loader').removeClass('loading').hide();
+    						swal("Error!",JSON.stringify(response["responseJSON"]["error"]) , {
+    								icon : "error",
+    								buttons: {        			
+    									confirm: {
+    										className : 'btn btn-danger'
+    									}
+    								},
+    							});
+    					}
+    				});
+    			   } 
+    		  });
+    		});
+    
+    		var rselected;
+    		var id, first_name, last_name, email, phonenum, role;
+    		function editUser(id) {
+    				var $row = $(id).closest("tr");  
+    				id = $row.find("td:nth-child(2)").text();   
+    				first_name = $row.find("td:nth-child(4)").text();
+    					last_name = $row.find("td:nth-child(5)").text();
+    					username = $row.find("td:nth-child(6)").text();
+    				email = $row.find("td:nth-child(9)").text();
+    					phonenum = $row.find("td:nth-child(10)").text().split("+63")[1];
+    					role = $row.find("td:nth-child(12)").text();
+    					is_active = $row.find("td:nth-child(13)").text();
+    
+    					$("#clear1").click();
+    
+    				$('#editform').find('#id').val(id);
+    				$('#editform').find('#first_name').val(first_name);
+    				$('#editform').find('#last_name').val(last_name);
+    				$('#editform').find('#username').val(username);
+    					$('#editform').find('#email').val(email);
+    					$('#editform').find('div.role option[value="'+role+'"]').prop('selected', true);	
+    
+    					$('#editform').find('#password1').val('');
+    					$('#editform').find('#password2').val('');
+    					$('#editform').find('#confpassword1').val('');
+    					$('#editform').find('#confpassword2').val('');
+    
+    					if(phonenum=="None"){
+    					$('#editform').find('#phonenum').val("");
+    				}
+    				else{
+    					$('#editform').find('#phonenum').val(phonenum);
+    				}
+    
+    					if(is_active=="Active"){
+    						$('#id_is_active').prop('checked',true)
+    					}
+    					else{
+    						$('#id_is_active').prop('checked', false);
+    					}
+    		}
+    		function deleteUser(){
+    			var rowCount=table.rows( { selected: true } ).count();
+    			if(confirm("Are you sure you want to delete: "+rowCount+" user(s)?")){
+    			$.each(rselected, function() {
+    				$.ajax({
+    					url: '{% url "delete-user" %}',
+    					data: {
+    						'id': this[0],
+    					},
+    					type: "GET",
+    					dataType: "json",
+    					success: function(data){
+    						if (data.deleted==true) {
+    								table.ajax.reload(); 
+    								$('#export').attr('disabled','disabled');
+    								$('#delete').attr('disabled','disabled');
+    								$('#delete').removeClass('btn-danger');
+    								$('#delete').addClass('btn-light');
+    								$('.buttons-print').attr('disabled','disabled');
+    								$('.buttons-print').html('<i class="fas fa-print"></i> Print');
+    								$('#delete').html('<i class="fas fa-trash-alt"></i> Delete');
+    								$.notify({
+    									icon: 'flaticon-alarm-1',
+    									title: 'Success!',
+    									message: 'User was successfully deleted!',
+    								},{
+    									type: 'success',
+    									placement: {
+    										from: "top",
+    										align: "right"
+    									},
+    									time: 1000,
+    								});
+    						}
+    						else{
+    								$.notify({
+    									icon: 'flaticon-alarm-1',
+    									title: 'Error!',
+    									message: JSON.stringify('You cannot delete the logged-in user.'),
+    								},{
+    									type: 'danger',
+    									placement: {
+    										from: "top",
+    										align: "right"
+    									},
+    									time: 1000,
+    								});
+    						}
+    					},
+    					error: function(response){
+    						$.notify({
+    							icon: 'flaticon-alarm-1',
+    							title: 'Error!',
+    							message: JSON.stringify(response["responseJSON"]["error"]),
+    						},{
+    							type: 'danger',
+    							placement: {
+    								from: "top",
+    								align: "right"
+    							},
+    							time: 1000,
+    						});
+    					}
+    				});
+    				});
+    			}
+    		}	
+    	
+</script> {% endblock javascripts %}

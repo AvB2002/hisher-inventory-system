@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Hisher General Merchandise</title>
+    <link rel="stylesheet" href="{% static 'assets/css/homepage/style.css' %}">
+</head>
+
+<body>
+    <div class="container">
+        {% include 'includes/homepage-navigation.html' %}
+    </div>
+
+    {% include 'includes/social-icons.html' %}
+
+    <div class="about">
+        <div id="header">
+            <h1>About Us</h1>
+            <p>As a family owned business we stand behind our name and know the importance of quality work at affordable prices.   We understand the importance of providing a personal experience in the services we provide and that's why we are here to serve all our customer's motorcycle needs.  We rely on our quality name for continued success and we thank our customers for providing us an opportunity to serve you. As a full service shop we handle jobs from large to small.</p>
+           
+            <h1>Mission and Vision</h1>
+            <p>To provide motorcycle owners and enthusiasts with the motorcycle related repairs, service, products and knowledge that fulfill their expectations at affordable price.
+            Our friendly, knowledgeable and professional staff will help to inspire, educate, problem-solve and strive for continued excellence in customer service.</p>
+        </div>
+    </div>
+
+    <img src="{% static 'assets/homepage_images/logo.png' %}" class="feature-img2">
+
+    </div>
+</body>
+</html>

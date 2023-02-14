@@ -1,0 +1,428 @@
+{% extends "layouts/base.html" %} {% block title %} Add Sales Order {% endblock %}
+<!-- Specific Page CSS goes HERE  --> {% block stylesheets %}
+{% load static %}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css" />
+<link rel="stylesheet" href="{% static 'assets/css/manage-style.css' %}" />
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+    input.form-control[readonly] {
+        background-color: white !important;
+        color: black !important;
+    }
+    button.btn-delete:hover {
+        background: #f25961 !important;
+        color: #ffffff;
+    }
+    .background-pic {
+        background-image: url("{% static 'assets/img/Shop_1.jpg' %}");
+        height: 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .select2-selection__rendered {
+        line-height: 51px !important;
+    }
+    .select2-container .select2-selection--single {
+        height: 55px !important;
+    }
+    .select2-selection__arrow {
+        height: 54px !important;
+    }
+</style> {% endblock stylesheets %} {% block content %} 
+<div class="content">
+    <div class="panel-header background-pic">
+        <div class="page-inner py-5">
+            <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+                <div class="mr-2">
+                    <h2 class="text-light fw-bold">Sales Order</h2>
+                    <h5 class="text-light op-8 mt-0 mb-2">Add Order</h5>
+                </div>
+                <ul class="breadcrumbs card m-0 p-3 ml-2 mb-0">
+                    <li class="nav-home"> <a href="{% url 'home' %}"> Dashboard </a> </li>
+                    <li class="separator"> <i class="flaticon-right-arrow"></i> </li>
+                    <li class="nav-item"> <a>Sales Order</a> </li>
+                    <li class="separator"> <i class="flaticon-right-arrow"></i> </li>
+                    <li class="nav-item"> <a href="{% url 'add-sales-order' %}" class="badge badge-secondary text-light">Add Order</a> </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="page-inner mt--5">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-lg-flex justify-content-between">
+                        <div class="col-lg-3">
+                            <div class="mt-3 mb-0 card card-dark bg-secondary-gradient">
+                                <div class="card-body pb-0">
+                                    <div id="newDate" class="badge badge-light fw-bold float-right"></div>
+                                    <h2 id="newProducts"></h2>
+                                    <p>New Products</p>
+                                    <div class="pull-in sparkline-fix chart-as-background">
+                                        <div id="productlineChart"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="mt-3 mb-0 card card-dark bg-success-gradient">
+                                <div class="card-body pb-0">
+                                    <h1 id="SuffStock"></h1>
+                                    <p><i class="fas fa-dolly-flatbed mr-1"></i> Product <span id="OnHand"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="mt-3 mb-0 card card-dark bg-warning-gradient">
+                                <div class="card-body pb-0">
+                                    <h1 id="NeedReorder"></h1>
+                                    <p><i class="fas fa-clipboard-list"></i> Critical Stock</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="mt-3 mb-0 card card-dark bg-info-gradient">
+                                <div class="card-body pb-0">
+                                    <h1 id="NewProduct"></h1>
+                                    <p><i class="fas fa-dolly-flatbed mr-1"></i> w/o unit(s)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-row-reverse mt-2"> <a href="{% url 'manage-product' %}" class="mr-3"><i class="fas fa-angle-double-right"></i> View Products </a> </div>
+                </div>
+                <div class="card mb-0">
+                    <form id="addorder" method="POST" action=""> {% csrf_token %} <div class="card-body bg-light p-2 border-bottom border-secondary">
+                            <div class="row m-2"> {% for message in messages %} <div class="{% if request.session.status == 'Approved' %}bg-green-600{% else %}bg-yellow-500{% endif %} text-light px-4 py-3 rounded relative w-100 m-3" role="alert">
+                                    <h3> <strong class="font-bold"><i class="fa fa-paper-plane" aria-hidden="true"></i> Sales Order was successfully submitted!</strong> </h3>
+                                    <h5 class="border-bottom">Transaction Information:</h5> <span class="block sm:inline">{{ message | safe | linebreaks}}</span>
+                                </div> {% endfor %} <div class="pl-4 row w-100">
+                                    <div class="row pl-3 pb-2 h-70 col-lg-6" style="width:130%;">
+                                        <div class="col-lg-12"> <label for="buyer_name" class="placeholder">Customer <span class="text-danger">*</span></label> {{ form.buyer_name }} </div>
+                                        <div class="col-lg-6"> <label for="date" class="placeholder">Date <span class="text-danger">*</span></label> <input class="input form-control" type="date" name="date" required /> </div>
+                                        <div class="col-lg-6"> <label for="due_date" class="placeholder">Due-Date <span class="text-danger">*</span></label> <input class="input form-control" type="date" name="due_date" required /> </div>
+                                        <div class="col-lg-12">
+                                            <div class="p-0 pt-2 form-group">
+                                                <div class="form-control"> <label for="status" class="placeholder border-bottom w-100 border-danger">Status <span class="text-danger">*</span></label> {{ form.status }} </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p-0 pl-3 col-lg-6 pb-3 mr-3"> <label for="message" class="placeholder">Message <small>(Optional)</small></label> {{ form.message }} </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m-2">
+                            <div class="row">
+                                <div class="col-lg-12 m-2"> <select class="js-example-basic" name="product" id="product_select" style="width: 98.8%;">
+                                        <option value=""></option> {% for product in product %} <option value="{{ product.product__id }}">{{ product.product__name }} [Brand: {{ product.product__brand }}, Supplier: {{ product.product__supplier__name }}]</option> {% endfor %}
+                                    </select> </div>
+                            </div> {% load formset_tags %} {{ formset.media }}
+                            <div id="formset" class="pt-0 mt-0 p-2 table-responsive" data-formset-prefix="{{ formset.prefix }}"> {{ formset.management_form }}
+                                <table id="basic-datatables" class="table text-nowrap mt-1 table-hover">
+                                    <!-- New forms will be inserted in here -->
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"></th>
+                                            <th scope="col" class="text-center">ID</th>
+                                            <th scope="col" class="text-center">Product</th>
+                                            <th scope="col" class="text-center">Quantity</th>
+                                            <th scope="col" class="text-center">Qty-On-Hand</th>
+                                            <th scope="col" class="text-center">Price</th>
+                                            <th scope="col" class="text-center">Sum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-formset-body></tbody>
+                                </table>
+                                <div class="row w-100">
+                                    <div class="col">
+                                        <div class="card"></div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card"></div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card"></div>
+                                    </div>
+                                    <div class="col">
+                                        <table class="table text-wrap">
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <h2>Total:</h2>
+                                                    </td>
+                                                    <td>
+                                                        <h1> <b>₱ <span class="total">0.00</span></b> </h1>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <!-- The empty form template. By wrapping this in a <script> tag, the
+										__prefix__ placeholder can easily be replaced in both attributes and
+										any scripts -->
+                                <script type="form-template" data-formset-empty-form> {% escapescript %}
+                                    	<tr data-formset-form>
+                                    		{% with formset.empty_form as form %}
+                                    			<td style="width: 1%;"><div class="hidden">{{ form.DELETE }}</div>
+                                    			<button type="button" class="btn btn-light btn-delete rounded-circle pl-2 pr-2 pt-1 pb-1" data-formset-delete-button><i class="fa fa-trash" aria-hidden="true"></i></button></td>
+                                    			<td style="width: 1%;" class="text-center"><div class="product hidden">{{ form.product }}</div><div class="id"></div></td>
+                                    			<td style="width: 20%;">{{ form.product_name }}<div class="d-flex flex-row w-100 p-2"><div><div class="avatar avatar-lg"></div></div><div class="ml-2 product_info"></div></div></td>
+                                    			<td style="width: 10%;" class="text-center">{{ form.qty }}</td>
+                                    			<td style="width: 10%;" class="text-center"></td>
+                                    			<td style="width: 10%;" class="text-center">{{ form.price }}</td>
+                                    			<td class="amount" style="width: 10%;">0.00</td>
+                                    		{% endwith %}
+                                    	</tr>
+                                    {% endescapescript %}
+                                </script> <!-- This button will add a new form when clicked --> <button id="add_product" type="button" data-formset-add></button> <button type="submit" class="ml-2 btn btn-secondary">Create Order</button> <button type="button" class="ml-2 btn btn-danger" onclick="window.location.reload(true);">Reset</button>
+                                <script>
+                                    jQuery(function ($) {
+                                        $("#formset").formset({
+                                            animateForms: true,
+                                            reorderMode: "dom",
+                                        });
+                                    });
+                                </script>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> {% endblock content %}
+<!-- Specific Page JS goes HERE  --> {% block javascripts %} <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js" integrity="sha512-RtZU3AyMVArmHLiW0suEZ9McadTdegwbgtiQl5Qqo9kunkVg1ofwueXD8/8wv3Af8jkME3DDe3yLfR8HSJfT2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.11.3/dataRender/datetime.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.10.21/dataRender/datetime.js"></script>
+<script>
+    var formCtr = 0;
+
+    function calc_total() {
+    	var sum = 0;
+    	$(".amount").each(function() {
+    		sum += parseFloat($(this).text());
+    	});
+    	$(".total").text(
+    		sum.toLocaleString(undefined, {
+    			minimumFractionDigits: 2,
+    			maximumFractionDigits: 2,
+    		})
+    	);
+    }
+
+    function btn_delete(id) {
+		$(document).find(id).parents("tr").html("");
+    	calc_total();
+    }
+
+    $(document).ready(function() {
+
+		$('#addorder').submit(function(e){
+			if (confirm('Are you sure you want to create this Order?')) {
+				if(formCtr==0){
+					$('#ajax-loader').removeClass('loading').hide();
+					e.preventDefault();
+					$.notify({
+						icon: 'flaticon-alarm-1',
+						title: 'Error!',
+						message: 'Add an item inside the Order List to proceed on the Order Creation.',
+					}, {
+						type: 'danger',
+						placement: {
+							from: "top",
+							align: "right"
+						},
+						time: 1000,
+					});
+				}else{
+					$('#ajax-loader').addClass('loading').show();
+				}
+			} else{
+				$('#ajax-loader').removeClass('loading').hide();
+				e.preventDefault();
+			}
+		});
+
+		var date = new Date().toISOString().split('T')[0];
+		$('input[name="date"]').attr("min", date);
+    	$('input[type="date"]').on("change", function() {
+    		var sel_date = new Date($('input[type="date"]').val()).toISOString().slice(0, 10);
+    		$('input[name="due_date"]').attr("min", sel_date);
+    	});
+		
+    	$.ajax({
+    		type: "GET",
+    		url: "{% url 'product-graph' %}",
+    		success: function(data) {
+    			var arr = [];
+    			var total = 0;
+    			$.each(data.cdc, function(key, value) {
+    				total = total + value;
+    				arr.push(total);
+    			});
+
+    			$("#productlineChart").sparkline(arr, {
+    				type: "line",
+    				height: "70",
+    				width: "100%",
+    				lineWidth: "2",
+    				lineColor: "rgba(255, 255, 255, .5)",
+    				fillColor: "rgba(255, 255, 255, .15)",
+    			});
+    			if (data.count != 0) {
+    				$("#newDate").html("As of " + moment(data.date[data.date.length - 1]).format("MMMM DD,YYYY"));
+    				$("#newProducts").html(data.cdc[data.cdc.length - 1]);
+    				$("#productCount").html(data.count);
+    			} else {
+    				$("#newDate").html("As of " + moment(data.date[data.date.length - 1]).format("MMMM DD,YYYY"));
+    				$("#newProducts").html("0");
+    				$("#productCount").html(data.count);
+    			}
+
+    			if (data.total_on_hand != 0) {
+    				$("#OnHand").html(": " + data.total_on_hand["qty__sum"] + " <small>on-hand unit(s)</small>");
+    			} else {
+    				$("#OnHand").html(": 0 <small>on-hand unit(s)</small>");
+    			}
+
+    			if (data.suff_stock != 0) {
+    				$("#SuffStock").html(data.suff_stock + " <small>sufficient product(s)</small>");
+    			} else {
+    				$("#SuffStock").html("0 <small>sufficient  product(s)</small>");
+    			}
+
+    			if (data.need_reorder != 0) {
+    				$("#NeedReorder").html(data.need_reorder + " <small>product(s)</small>");
+    			} else {
+    				$("#NeedReorder").html("0 <small>product(s)</small>");
+    			}
+
+    			if (data.new_product != 0) {
+    				$("#NewProduct").html(data.new_product + " <small>product(s)</small>");
+    			} else {
+    				$("#NewProduct").html("0 <small>product(s)</small>");
+    			}
+    		},
+    	});
+
+    	$(".js-example-basic").select2({
+    		placeholder: "Select a product",
+    		allowClear: true,
+    		theme: "classic",
+    	});
+
+    	$("#product_select").prop("selectedIndex", -1);
+
+    	$("#product_select").on("change", function(e) {
+    		var passVal = false;
+    		var selectedId = $(this).find(":selected").val();
+    		var selectedText = $(this).find(":selected").text();
+    		$("table#basic-datatables")
+    			.find("tr:visible")
+    			.each(function(i, el) {
+    				var $tds = $(this).find("td"),
+    					productId = $tds.eq(1).find("div.id").text();
+    				if (productId == selectedId) {
+    					passVal = true;
+    				}
+    			});
+    		if (selectedText != "" && passVal == false) {
+				$('#ajax-loader').addClass('loading').show();
+    			$("#add_product").click();
+    			$.ajax({
+    				type: "GET",
+    				url: "{% url 'get-product' %}",
+    				data: {
+    					id: selectedId
+    				},
+    				dataType: "json",
+    				success: function(data) {
+						$('#ajax-loader').removeClass('loading').hide();
+    					var datatmp = jQuery.parseJSON(data);
+    					var productdata = jQuery.parseJSON(datatmp[0]);
+    					var stockdata = jQuery.parseJSON(datatmp[1]);
+    					var supplierdata = jQuery.parseJSON(datatmp[2]);
+    					$("table#basic-datatables tr:last>td:nth-child(1)>button").attr("onclick", 'btn_delete("#id_' + formCtr + '-amount");');
+    					$("table#basic-datatables tr:last>td:nth-child(2)>div.product>select").find("option[value='" + productdata[0]["pk"] + "']").prop('selected', true);
+    					$("table#basic-datatables tr:last>td:nth-child(2)>div.id").append(productdata[0]["pk"]);
+						if (!productdata[0]["fields"]["img"] || productdata[0]["fields"]["img"] == "" ) {
+							$("table#basic-datatables tr:last>td:nth-child(3)>.d-flex>div>.avatar").append("<img class='avatar-img rounded-circle' src='{% static 'assets/img/no_image.png' %}' alt='image' width='80' height='80'>");
+						} else {
+							$("table#basic-datatables tr:last>td:nth-child(3)>.d-flex>div>.avatar").append("<img class='avatar-img rounded-circle' src='{{ cloudinary_url }}" + productdata[0]["fields"]["img"] + "'/>");
+						}
+    					$("table#basic-datatables tr:last>td:nth-child(3)>.d-flex>.product_info").append(
+    						'<span class="text-lg"><code>Product:</code><code class="text-black">' +
+    						productdata[0]["fields"]["name"] +
+    						'</code><br><code>Brand:</code><code class="text-black">' +
+    						productdata[0]["fields"]["brand"] +
+    						"</code>" +
+    						'<br><code>Supplier:</code><code class="text-black">' +
+    						supplierdata[0]["fields"]["name"] +
+    						"</code></span>"
+    					);
+    					$("table#basic-datatables tr:last>td:nth-child(3)>input").val(productdata[0]["fields"]["name"]);
+    					$("table#basic-datatables tr:last>td:nth-child(4)").find("input").attr({
+    						max: stockdata[0]["fields"]["qty"]
+    					});
+    					$("table#basic-datatables tr:last>td:nth-child(5)").append('<h5 class="badge-pill bg-green-600 text-light text-center m-5">' + stockdata[0]["fields"]["qty"] + "</h5>");
+    					$("table#basic-datatables tr:last>td:nth-child(6)>input").val(stockdata[0]["fields"]["retail_price"]);
+    					$("table#basic-datatables tr:last>td:nth-child(6)").append(stockdata[0]["fields"]["retail_price"]);
+    					$("table#basic-datatables tr:last>td:nth-child(7)").attr("id", "id_" + formCtr + "-amount");
+    					$.notify({
+    						icon: "flaticon-alarm-1",
+    						title: "Success!",
+    						message: "Product[" + productdata[0]["fields"]["name"] + "] was successfully inserted in the Order List!",
+    					}, {
+    						type: "success",
+    						placement: {
+    							from: "top",
+    							align: "right",
+    						},
+    						time: 500,
+    					});
+    					formCtr += 1;
+    				},
+					error: function () {
+						$('#ajax-loader').removeClass('loading').hide();
+					}
+    			});
+    		} else {
+    			$.notify({
+    				icon: "flaticon-alarm-1",
+    				title: "Error!",
+    				message: "Product was already selected inside of the Order List!",
+    			}, {
+    				type: "danger",
+    				placement: {
+    					from: "top",
+    					align: "right",
+    				},
+    				time: 1000,
+    			});
+    		}
+    		$("#product_select").val(" ");
+    		$(".js-example-basic").select2({
+    			placeholder: "Select a product",
+    			allowClear: true,
+    			theme: "classic",
+    		});
+    	});
+
+    	$(document).on("input", ".qty", function() {
+    		var total = [];
+    		var $tr = $(this).closest("tr");
+    		var textValue1 = $("input.price", $tr).val();
+    		var textValue2 = $("input.qty", $tr).val();
+    		var amt = textValue1 * textValue2;
+    		// console.log(amt);
+    		$(".amount", $tr).html(amt.toFixed(2));
+    		calc_total();
+    	});
+    });
+</script> {% endblock javascripts %}

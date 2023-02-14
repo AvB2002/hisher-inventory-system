@@ -1,0 +1,429 @@
+{% extends "layouts/base.html" %} {% block title %} Dashboard {% endblock %}
+<!-- Specific Page CSS goes HERE  --> {% block stylesheets %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'assets/css/manage-style.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.min.css" integrity="sha512-zrPsLVYkdDha4rbMGgk9892aIBPeXti7W77FwOuOBV85bhRYi9Gh+gK+GWJzrUnaCiIEm7YfXOxW8rzYyTuI1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+    .background-pic{
+    background-image: url("{% static 'assets/img/Shop_1.jpg' %}");
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    }
+</style> {% endblock stylesheets %} {% block content %} <div class="content">
+    <div class="panel-header background-pic">
+        <div class="page-inner py-5">
+            <div class="row">
+                <div class="col-sm-6 col-md-3">
+                    <div class="card card-stats card-round">
+                        <div class="card-body ">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="icon-big text-center"> <i class="flaticon-chart-pie text-warning"></i> </div>
+                                </div>
+                                <div class="col-7 col-stats">
+                                    <div class="numbers">
+                                        <p class="card-category">Available Products</p>
+                                        <h4 class="card-title">{{product_count}}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="card card-stats card-round">
+                        <div class="card-body ">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="icon-big text-center"> <i class="flaticon-graph-2 text-success"></i> </div>
+                                </div>
+                                <div class="col-7 col-stats">
+                                    <div class="numbers">
+                                        <p class="card-category">Total Sales (Monthly)</p> {% load humanize %} {% if monthly_sales.total_sales__sum %} <h4 class="card-title">₱ {{monthly_sales.total_sales__sum|intcomma}}</h4>{% else %}<h4 class="card-title">₱ 0</h4>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="card card-stats card-round">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="icon-big text-center"> <i class="flaticon-box-2 text-primary"></i> </div>
+                                </div>
+                                <div class="col-7 col-stats">
+                                    <div class="numbers">
+                                        <p class="card-category">On-Hand Stocks</p> {% if total_stocks.qty__sum %} <h4 class="card-title">{{total_stocks.qty__sum|intcomma}} unit(s)</h4> {% else %}<h4 class="card-title">0 unit(s)</h4>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="card card-stats card-round">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-5">
+                                    <div class="icon-big text-center"> <i class="icon-social-dropbox text-danger"></i> </div>
+                                </div>
+                                <div class="col-7 col-stats">
+                                    <div class="numbers">
+                                        <p class="card-category">Critical Stock</p>
+                                        <h4 class="card-title">{{critical_stock}} unit(s)</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+                <div>
+                    <h2 class="text-light pb-2 fw-bold">Dashboard</h2>
+                    <h5 class="text-light op-7 mb-2">Hisher Inventory Admin Dashboard</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="page-inner mt--5">
+        <div class="row mt--2">
+            <div class="col-md-6">
+                <div class="col-lg-12 p-0">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex">
+                                <div class="card-title">Store Data Visual Chart</div> <button id="printChart" class="btn btn-outline-secondary btn-rounded ml-auto"><i class="fas fa-print"></i> Print</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex"> <select id="dateYear"> {% for year in year_list %} <option value="{{ year }}">{{ year }}</option> {% endfor %} </select>
+                                <ul class="nav nav-pills nav-secondary nav-pills-no-bd ml-auto" id="pills-tab-without-border" role="tablist">
+                                    <li class="nav-item"> <a class="nav-link active" id="pills-bar-tab-nobd" data-toggle="pill" href="#pills-bar-nobd" role="tab" aria-controls="pills-bar-nobd" aria-selected="true">Bar Chart</a> </li>
+                                    <li class="nav-item"> <a class="nav-link" id="pills-line-tab-nobd" data-toggle="pill" href="#pills-line-nobd" role="tab" aria-controls="pills-line-nobd" aria-selected="false">Line Chart</a> </li>
+                                </ul>
+                            </div>
+                            <div id="chartTabPane" class="tab-content mt-2 mb-3" id="pills-tabContent">
+                                <div class="tab-pane fade show active" id="pills-bar-nobd" role="tabpanel" aria-labelledby="pills-bar-tab">
+                                    <div class="chart-container"> <canvas id="multipleBarChart"></canvas> </div>
+                                </div>
+                                <div class="tab-pane fade show" id="pills-line-nobd" role="tabpanel" aria-labelledby="pills-line-tab">
+                                    <div class="chart-container"> <canvas id="multipleLineChart"></canvas> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header mb-0 pb-0">
+                                <div class="card-title"><i class="text-secondary fas fa-calendar"></i> Weekly Sales</div>
+                                <div class="card-category">{{ start_date|date:"M d" }} - {{ end_date|date:"M d" }}</div>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div class="mb-4 mt-0"> {% if weekly_sales.total_sales__sum %} <h1>₱ {{weekly_sales.total_sales__sum|intcomma}}</h1> {% else %}<h1>₱ 0</h1>{% endif %} </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card card-secondary">
+                            <div class="card-header mb-0 pb-0">
+                                <div class="card-title"><i class="fas fa-calendar"></i> Monthly Sales</div>
+                                <div class="card-category">{{ current_month }} 01 - {{ current_month }} {{month_day}}</div>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div class="mb-4 mt-0"> {% if monthly_sales.total_sales__sum %} <h1>₱ {{monthly_sales.total_sales__sum|intcomma}}</h1> {% else %}<h1>₱ 0</h1>{% endif %} </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card card-secondary">
+                            <div class="card-header mb-0 pb-0">
+                                <div class="card-title"><i class="fas fa-calendar"></i> Weekly Purchase</div>
+                                <div class="card-category">{{ start_date|date:"M d" }} - {{ end_date|date:"M d" }}</div>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div class="mb-4 mt-0"> {% if weekly_purchase.total_purchase__sum %} <h1>₱ {{weekly_purchase.total_purchase__sum|intcomma}}</h1> {% else %}<h1>₱ 0</h1>{% endif %} </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header mb-0 pb-0">
+                                <div class="card-title"><i class="text-secondary fas fa-calendar"></i> Monthly Purchase</div>
+                                <div class="card-category">{{ current_month }} 01 - {{ current_month }} {{month_day}}</div>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div class="mb-4 mt-0"> {% if monthly_purchase.total_purchase__sum %} <h1>₱ {{monthly_purchase.total_purchase__sum|intcomma}}</h1> {% else %}<h1>₱ 0</h1>{% endif %} </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header mb-0 pb-0">
+                                <div class="card-title"><i class="text-secondary fas fa-calendar"></i> Weekly Order</div>
+                                <div class="card-category">{{ start_date|date:"M d" }} - {{ end_date|date:"M d" }}</div>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div class="mb-4 mt-0"> {% if weekly_order %} <h1>{{weekly_order}} order(s)</h1> {% else %}<h1>0 order(s)</h1>{% endif %} </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card card-secondary">
+                            <div class="card-header mb-0 pb-0">
+                                <div class="card-title"><i class="fas fa-calendar"></i> Monthly Order</div>
+                                <div class="card-category">{{ current_month }} 01 - {{ current_month }} {{month_day}}</div>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div class="mb-4 mt-0"> {% if monthly_order %} <h1>{{monthly_order}} order(s)</h1> {% else %}<h1>0 order(s)</h1>{% endif %} </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card full-height">
+                    <div class="card-header">
+                        <div class="card-title">Feed Activity</div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-pills nav-secondary nav-pills-no-bd" id="pills-tab-without-border" role="tablist">
+                            <li class="nav-item"> <a class="nav-link active" id="pills-stock_in-tab-nobd" data-toggle="pill" href="#pills-stock_in-nobd" role="tab" aria-controls="pills-stock_in-nobd" aria-selected="true">Stock-In</a> </li>
+                            <li class="nav-item"> <a class="nav-link" id="pills-stock_out-tab-nobd" data-toggle="pill" href="#pills-stock_out-nobd" role="tab" aria-controls="pills-stock_out-nobd" aria-selected="false">Stock-Out</a> </li>
+                            <li class="nav-item"> <a class="nav-link" id="pills-reorder-tab-nobd" data-toggle="pill" href="#pills-reorder-nobd" role="tab" aria-controls="pills-reorder-nobd" aria-selected="false">Critical Stock</a> </li>
+                            <li class="nav-item"> <a class="nav-link" id="pills-category-tab-nobd" data-toggle="pill" href="#pills-category-nobd" role="tab" aria-controls="pills-category-nobd" aria-selected="false">Category</a> </li>
+                        </ul>
+                        <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+                            <div class="tab-pane fade show active" id="pills-stock_in-nobd" role="tabpanel" aria-labelledby="pills-stock_in-tab">
+                                <ul class="activity-feed pb-0"> {% if stock_in %} {% for log in stock_in %} <li class="feed-item feed-item-success"> <time class="date" datetime="{{ log.created_date|date:"D M-d" }}">{{ log.created_date|date:"D, M-d" }}<b class="ml-2">{{ log.created_date|date:"h:i a" }}</b></time> <span class="text">Purchased <b class="text-danger"><u>{{log.qty_added}} unit(s)</u></b> of {{log.product_name}} from {{log.supplier_name}}</span> </li> {% endfor %} </li><a class="text-secondary mt-2" href="{% url 'purchases-report' %}">Show all</a></li> {% else %} <div class="d-flex h-100 justify-content-center my-10">
+                                        <h1><i class="fas fa-exclamation-triangle mr-1"></i>No Data to Show!</h1>
+                                    </div> {% endif %} </ul>
+                            </div>
+                            <div class="tab-pane fade" id="pills-stock_out-nobd" role="tabpanel" aria-labelledby="pills-stock_out-tab">
+                                <ul class="activity-feed pb-0"> {% if stock_out %} {% for log in stock_out %} <li class="feed-item feed-item-warning"> <time class="date" datetime="{{ log.created_date|date:"D M-d" }}">{{ log.created_date|date:"D, M-d" }}<b class="ml-2">{{ log.created_date|date:"h:i a" }}</b></time> <span class="text">Selled <b class="text-danger"><u>{{log.qty_selled}} unit(s)</u></b> of {{log.product_name}} (Supplied by {{log.supplier_name}})</span> </li> {% endfor %} </li><a class="text-secondary mt-2" href="{% url 'sales-report' %}">Show all</a></li> {% else %} <div class="d-flex h-100 justify-content-center my-10">
+                                        <h1><i class="fas fa-exclamation-triangle mr-1"></i>No Data to Show!</h1>
+                                    </div> {% endif %} </uL>
+                            </div>
+                            <div class="tab-pane fade" id="pills-reorder-nobd" role="tabpanel" aria-labelledby="pills-reorder-tab">
+                                <ul class="activity-feed pb-0"> {% if critical_stock_log %} {% for log in critical_stock_log %} <li class="feed-item feed-item-danger"> <span class="date">Product Name: <b class="ml-1">{{log.product__name}}</b></span> <span class="text">Remaining <small>Quantity</small>: <b class="text-danger">{{log.qty}} unit(s)</b></span> </li> {% endfor %} </li><a class="text-secondary mt-2" href="{% url 'manage-product' %}">Show all</a></li> {% else %} <div class="d-flex h-100 justify-content-center my-10">
+                                        <h1><i class="fas fa-exclamation-triangle mr-1"></i>No Data to Show!</h1>
+                                    </div> {% endif %} </ul>
+                            </div>
+                            <div class="tab-pane fade" id="pills-category-nobd" role="tabpanel" aria-labelledby="pills-category-tab">
+                                <ul class="activity-feed pb-0"> {% if product_log %} {% for log in product_log %} <li class="feed-item feed-item-info"> <time class="date" datetime="{{ log.created_date|date:"D M-d" }}">{{ log.created_date|date:"D M-d" }}<b class="ml-2">{{ log.created_date|date:"h:i a" }}</b></time> <span class="text">Added <b class="text-danger"><u>{{log.name}}</u></b> to {{log.category}}</span> </li> {% endfor %} </li><a class="text-secondary mt-2" href="{% url 'manage-category' %}">Show all</a></li> {% else %} <div class="d-flex h-100 justify-content-center my-10">
+                                        <h1><i class="fas fa-exclamation-triangle mr-1"></i>No Data to Show!</h1>
+                                    </div> {% endif %} </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Selled Products <span class="badge bg-green-500 text-white">{{ tsp_count }}</span></div>
+                    </div>
+                    <div class="card-body pb-0 overflow-auto" style="height:410px;"> {% if top_sell_products %} {% for prod in top_sell_products %} <div class="d-flex">
+                            <div class="avatar"> <img src="{% if prod.product__img %}{{ cloudinary_url }}{{ prod.product__img }}{% else %}{% static 'assets/img/no_image.png' %}{% endif %}" alt="..." class="avatar-img rounded-circle"> </div>
+                            <div class="flex-1 pt-1 ml-2">
+                                <h6 class="fw-bold mb-1">{{ prod.product_name  }}</h6> <small class="text-muted">{{ prod.supplier_name }}</small>
+                            </div>
+                            <div class="d-flex ml-auto align-items-center">
+                                <h3 class="text-green-500 fw-bold">+₱{{ prod.sum }}</h3>
+                            </div>
+                        </div>
+                        <div class="separator-dashed"></div> {% endfor %} {% else %} <div class="d-flex h-50 justify-content-center my-20">
+                            <h1><i class="fas fa-exclamation-triangle mr-1"></i>No Data to Show!</h1>
+                        </div> {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Purchased Products <span class="badge badge-danger">{{ tpp_count }}</span></div>
+                    </div>
+                    <div class="card-body pb-0 overflow-auto" style="height:410px;"> {% if top_pur_products %} {% for prod in top_pur_products %} <div class="d-flex">
+                            <div class="avatar"> <img src="{% if prod.product__img %}{{ cloudinary_url }}{{ prod.product__img }}{% else %}{% static 'assets/img/no_image.png' %}{% endif %}" alt="..." class="avatar-img rounded-circle"> </div>
+                            <div class="flex-1 pt-1 ml-2">
+                                <h6 class="fw-bold mb-1">{{ prod.product_name  }}</h6> <small class="text-muted">{{ prod.supplier_name }}</small>
+                            </div>
+                            <div class="d-flex ml-auto align-items-center">
+                                <h3 class="text-danger fw-bold">-₱{{ prod.sum }}</h3>
+                            </div>
+                        </div>
+                        <div class="separator-dashed"></div> {% endfor %} {% else %} <div class="d-flex h-50 justify-content-center my-20">
+                            <h1><i class="fas fa-exclamation-triangle mr-1"></i>No Data to Show!</h1>
+                        </div> {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Pulled-Out Products <span class="badge badge-danger">{{ tpullp_count }}</span></div>
+                    </div>
+                    <div class="card-body pb-0 overflow-auto" style="height:410px;"> {% if top_pull_products %} {% for prod in top_pull_products %} <div class="d-flex">
+                            <div class="avatar"> <img src="{% if prod.product__img %}{{ cloudinary_url }}{{ prod.product__img }}{% else %}{% static 'assets/img/no_image.png' %}{% endif %}" alt="..." class="avatar-img rounded-circle"> </div>
+                            <div class="flex-1 pt-1 ml-2">
+                                <h6 class="fw-bold mb-1">{{ prod.product_name  }}</h6> <small class="text-muted">{{ prod.supplier_name }}</small>
+                            </div>
+                            <div class="d-flex ml-auto align-items-center">
+                                <h3 class="text-danger fw-bold">-₱{{ prod.sum }}</h3>
+                            </div>
+                        </div>
+                        <div class="separator-dashed"></div> {% endfor %} {% else %} <div class="d-flex h-50 justify-content-center my-20">
+                            <h1><i class="fas fa-exclamation-triangle mr-1"></i>No Data to Show!</h1>
+                        </div> {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> {% endblock content %}
+<!-- Specific Page JS goes HERE  --> {% block javascripts %} <script src="https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.js" integrity="sha512-/fgTphwXa3lqAhN+I8gG8AvuaTErm1YxpUjbdCvwfTMyv8UZnFyId7ft5736xQ6CyQN4Nzr21lBuWWA9RTCXCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(document).ready(function() {
+    var myMultipleBarChart=null,
+        myMultipleLineChart=null;
+        $("#dateYear").on("change",function (e) {
+            var dateYear=$(this).find(':selected').val();
+            if(myMultipleBarChart!=null){
+                myMultipleBarChart.destroy();
+                myMultipleLineChart.destroy();
+            }
+            var multipleBarChart = document.getElementById('multipleBarChart').getContext('2d'),
+            multipleLineChart = document.getElementById('multipleLineChart').getContext('2d');
+            $.ajax({
+                type: "GET",
+                url: "{% url 'bar-chart' %}",  
+                data: {dateYear:dateYear},
+                dataType: "json",
+                success: function (data) {
+                    myMultipleBarChart = new Chart(multipleBarChart, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets : [{
+                                label: "Sales",
+                                backgroundColor: '#59d05d',
+                                borderColor: '#59d05d',
+                                data: data.sales_data,
+                            },{
+                                label: "Purchases",
+                                backgroundColor: '#fdaf4b',
+                                borderColor: '#fdaf4b',
+                                data: data.purchase_data,
+                            }],
+                        },
+                        options: {
+                            responsive: true, 
+                            maintainAspectRatio: false,
+                            legend: {
+                                position : 'bottom'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Store Stats'
+                            },
+                            tooltips: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            responsive: true,
+                            scales: {
+                                xAxes: [{
+                                    stacked: true,
+                                }],
+                                yAxes: [{
+                                    stacked: true
+                                }]
+                            }
+                        }
+                    });
+    
+                    myMultipleLineChart = new Chart(multipleLineChart, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: "Sales",
+                                borderColor: '#59d05d',
+                                pointBorderColor: "#FFF",
+                                pointBackgroundColor: '#59d05d',
+                                pointBorderWidth: 2,
+                                pointHoverRadius: 4,
+                                pointHoverBorderWidth: 1,
+                                pointRadius: 4,
+                                backgroundColor: 'transparent',
+                                fill: true,
+                                borderWidth: 2,
+                                data: data.sales_data,
+                            },{
+                                label: "Purchases",
+                                borderColor: '#fdaf4b',
+                                pointBorderColor: "#FFF",
+                                pointBackgroundColor: '#fdaf4b',
+                                pointBorderWidth: 2,
+                                pointHoverRadius: 4,
+                                pointHoverBorderWidth: 1,
+                                pointRadius: 4,
+                                backgroundColor: 'transparent',
+                                fill: true,
+                                borderWidth: 2,
+                                data: data.purchase_data,
+                            }]
+                        },
+                        options : {
+                            responsive: true, 
+                            maintainAspectRatio: false,
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltips: {
+                                bodySpacing: 4,
+                                mode:"nearest",
+                                intersect: 0,
+                                position:"nearest",
+                                xPadding:10,
+                                yPadding:10,
+                                caretPadding:10
+                            },
+                            layout:{
+                                padding:{left:15,right:15,top:15,bottom:15}
+                            }
+                        }
+                    });
+    
+                }
+            });
+        });
+    
+        $("#dateYear").prop('selectedIndex', 0);
+        $("#dateYear").trigger("change");
+    
+        $("#printChart").on( 'click', function() {
+            var chartTP = $('#chartTabPane')
+            if (chartTP.find('div:nth-child(1)').hasClass('active')){
+                printJS({printable: document.querySelector("#multipleBarChart").toDataURL(), type: 'image', imageStyle: 'width:100%'});
+            }
+            else{
+                printJS({printable: document.querySelector("#multipleLineChart").toDataURL(), type: 'image', imageStyle: 'width:100%'});
+            }
+        });
+    
+    });
+    
+</script> {% endblock javascripts %}

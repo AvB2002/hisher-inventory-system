@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	{% load static %}
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title> HisHer IMS - {% block title %}{% endblock %} </title>
+    <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+    <link rel="icon" href="/static/assets/img/icon.ico" type="image/x-icon" />
+    <link rel="canonical" href="https://appseed.us/admin-dashboards/django-dashboard-atlantis-dark">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.0.2/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fakeLoader.js/1.1.0/fakeLoader.min.css" rel="stylesheet">
+    <style>
+        .abstract-pic{
+        	background-image: url("{% static 'assets/img/Shop_1.jpg' %}") !important;
+        	-webkit-background-size: cover;
+        	-moz-background-size: cover;
+        	-o-background-size: cover;
+        	background-size: cover;
+        }
+        .background-pic{
+        	background-image: url("{% static 'assets/img/login_background.jpg' %}") !important;
+        	background-position: center;
+        	background-repeat: no-repeat;
+        	background-size: cover;
+        }
+    </style> <!-- Fonts and icons -->
+    <script src="{% static 'assets/js/plugin/webfont/webfont.min.js' %}"></script>
+    <script>
+        WebFont.load({
+        	google: {"families":["Lato:300,400,700,900"]},
+        	custom: {"families":["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], 
+        	urls: ["{% static 'assets/css/fonts.min.css' %}"]},
+        	active: function() {
+        		sessionStorage.fonts = true;
+        	}
+        });
+    </script> <!-- CSS Files -->
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/atlantis.min.css' %}"> <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/manage-style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/jquery.contact-buttons.css'%} "> <!-- Specific Page CSS goes HERE  --> {% block stylesheets %} {% endblock stylesheets %}
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="pb-4"> {% include 'includes/login-header.html' %} </div>
+        <div id="loader"></div>
+        <div class="container-fluid background-pic">
+            <div class="d-flex justify-content-center"> {% block content %}{% endblock content %} </div>
+        </div>
+        <div class="mt-2"> {% include 'includes/footer.html' %} </div>
+    </div> {% include 'includes/scripts.html' %} <script src="https://cdnjs.cloudflare.com/ajax/libs/fakeLoader.js/1.1.0/fakeLoader.js"></script>
+    <script>
+        $("#loader").fakeLoader({
+        timeToHide:1200, //Time in milliseconds for fakeLoader disappear
+        zIndex:999, // Default zIndex
+        spinner:"spinner5",//Options: 'spinner1', 'spinner2', 'spinner3', 'spinner4', 'spinner5', 'spinner6', 'spinner7' 
+        bgColor:"#6760CE", //Hex, RGB or RGBA colors
+        });
+    </script> <!-- Specific Page JS goes HERE  --> {% block javascripts %} {% endblock javascripts %}
+	<div class="modal animated slideInUp" id="GroupBuddy" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title" id="exampleModalLabel">BUDDY</h2> <span class="ml-1 mt-2 badge-pill badge-secondary">Members</span> <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+				</div>
+				<div class="modal-body bg-gray-100">
+					<div class="row">
+
+						<div class="col-md-6">
+							<div class="card card-profile">
+								<div class="card-header" style="background-image: url('https://scontent.fmnl17-4.fna.fbcdn.net/v/t31.18172-8/18451706_1265693293547500_302731245647035052_o.jpg?_nc_cat=108&ccb=1-5&_nc_sid=19026a&_nc_eui2=AeH1J1Gux1tgvRXHKn0Iasb-D9bbE4jPNh0P1tsTiM82Hawp5ielNDGjg3bU6J24YOVwGry8sxguwnM-gPQyo1ID&_nc_ohc=hkwfEIXAbRMAX8xmdJK&_nc_ht=scontent.fmnl17-4.fna&oh=00_AT-yPXRdKEC-9QFtaqE0WdpOiqs40fP_DqwUqyg4Oly0rg&oe=6203B88A')">
+									<div class="profile-picture">
+										<div class="avatar avatar-xl">
+											<img src="https://res.cloudinary.com/dennsqzoz/image/upload/v1642316547/developers/aldrian_tlt6p7.jpg" alt="..." class="avatar-img rounded-circle">
+										</div>
+									</div>
+								</div>
+								<div class="card-body">
+									<div class="user-profile text-center">
+										<div class="name">Aldrian Barias</div>
+										<div class="job">Frontend/ Backend Developer</div>
+										<div class="desc">BSIT-3D</div>
+										<div class="view-profile">
+											<a href="https://www.facebook.com/AvB952002/" class="btn btn-secondary btn-block"><i class="mr-1 fab fa-facebook-square"></i> View Facebook Profile</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<div class="card card-profile">
+								<div class="card-header" style="background-image: url('https://scontent.fmnl17-2.fna.fbcdn.net/v/t1.6435-9/139772482_3031594920460567_5097037699591347975_n.jpg?_nc_cat=102&ccb=1-5&_nc_sid=174925&_nc_eui2=AeF_VpFm4smXLRY4zTZdsVoNtb1bi6_YS0O1vVuLr9hLQwERv366AxecMH34oE7iizPiuDuj5gGE-g5LzPxGzxwT&_nc_ohc=73DPOtplshIAX-khAd8&tn=3Yvgx-HNVChWHvA_&_nc_ht=scontent.fmnl17-2.fna&oh=00_AT_3_8ABKaBqang1mgzft5QTYgzg1YclqXj9sS26FDjfrA&oe=62037C9D')">
+									<div class="profile-picture">
+										<div class="avatar avatar-xl">
+											<img src="https://res.cloudinary.com/dennsqzoz/image/upload/v1642316547/developers/kurt_yh85aq.jpg" alt="..." class="avatar-img rounded-circle">
+										</div>
+									</div>
+								</div>
+								<div class="card-body">
+									<div class="user-profile text-center">
+										<div class="name">Kurt Steven Aviso</div>
+										<div class="job">Frontend Developer</div>
+										<div class="desc">BSIT-3D</div>
+										<div class="view-profile">
+											<a href="https://www.facebook.com/kurtstevenmendezaviso" class="btn btn-secondary btn-block"><i class="mr-1 fab fa-facebook-square"></i> View Facebook Profile</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<div class="card card-profile">
+								<div class="card-header" style="background-image: url('https://scontent.fmnl17-3.fna.fbcdn.net/v/t1.6435-9/78853779_608306306376484_1125483153280991232_n.jpg?_nc_cat=110&ccb=1-5&_nc_sid=19026a&_nc_eui2=AeE2ZV_pSgzCTAEU2J21b5ck-kC-6Y2NSiL6QL7pjY1KIhv5DD5YAyzyFWpVRXhGe5V-orQhlGbwaYit8czddrA0&_nc_ohc=meL29GdydeYAX9w7kdf&tn=3Yvgx-HNVChWHvA_&_nc_ht=scontent.fmnl17-3.fna&oh=00_AT8OnKT1lXd3D_eRtwRDXQbf5Jrr7_2zVY1L4mz2r_sUhw&oe=62053353')">
+									<div class="profile-picture">
+										<div class="avatar avatar-xl">
+											<img src="https://res.cloudinary.com/dennsqzoz/image/upload/v1642316549/developers/roa_vk46qq.jpg" alt="..." class="avatar-img rounded-circle">
+										</div>
+									</div>
+								</div>
+								<div class="card-body">
+									<div class="user-profile text-center">
+										<div class="name">John Louise Roa</div>
+										<div class="job">Frontend Developer</div>
+										<div class="desc">BSIT-3D</div>
+										<div class="view-profile">
+											<a href="https://www.facebook.com/LojAor" class="btn btn-secondary btn-block"><i class="mr-1 fab fa-facebook-square"></i> View Facebook Profile</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<div class="card card-profile">
+								<div class="card-header" style="background-image: url('https://scontent.fmnl17-4.fna.fbcdn.net/v/t1.18169-9/13512117_1720873951516053_4346823075525707361_n.jpg?_nc_cat=108&ccb=1-5&_nc_sid=174925&_nc_eui2=AeHVaOW_W38pMmhvkLjI4CMEqmVegSHP0AyqZV6BIc_QDI6ZeCNK3xL0X1T8-V-AFDNRHQp9n2GZ5t_1K5qXOmg0&_nc_ohc=BEebuj4cHUIAX_xcPRE&_nc_ht=scontent.fmnl17-4.fna&oh=00_AT8uYA1xYPfPqVVZVz7631vnylhmXdDcJC1_osjnNuuZiQ&oe=62025281')">
+									<div class="profile-picture">
+										<div class="avatar avatar-xl">
+											<img src="https://res.cloudinary.com/dennsqzoz/image/upload/v1642316548/developers/bongat_gdbgpj.jpg" alt="..." class="avatar-img rounded-circle">
+										</div>
+									</div>
+								</div>
+								<div class="card-body">
+									<div class="user-profile text-center">
+										<div class="name">Jerick Bongat</div>
+										<div class="job">Frontend Developer</div>
+										<div class="desc">BSIT-3D</div>
+										<div class="view-profile">
+											<a href="https://www.facebook.com/JerickDaw" class="btn btn-secondary btn-block"><i class="mr-1 fab fa-facebook-square"></i> View Facebook Profile</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+	
+				</div>
+				<div class="modal-footer"></div>
+		</div>
+	</div>
+</body>
+
+</html>

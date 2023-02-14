@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact | Hisher General Merchandise</title>
+    <link rel="stylesheet" href="{% static 'assets/css/homepage/style.css' %}">
+</head>
+
+<body>
+    <div class="container">
+        {% include 'includes/homepage-navigation.html' %}
+    </div>
+
+    <div class="contact-bg">
+        <center>
+            <h1>Contact Details</h1>
+            <img src="{% static 'assets/homepage_images/kuya.jpg' %}" class="img">
+            <p>Name:</p>
+            <h2>Rhyan Fuenzalida</h2>
+            <p>Contact number:</p>
+            <h2>09193398920</h2>
+            <h2>09989595876</h2>
+            <p>Hisher General Merchandise</p>
+            <p>Harvest Market Place, Nia Road Carsadang Bago 2, Imus City (1.09 mi) Imus, Philippines, 4103</p>
+        </center>
+    </div>
+
+    {% include 'includes/social-icons.html' %}
+
+    </div>
+</body>
+</html>

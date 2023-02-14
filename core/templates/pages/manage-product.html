@@ -1,0 +1,1330 @@
+{% extends "layouts/base.html" %} {% block title %} Manage Product {% endblock %}
+<!-- Specific Page CSS goes HERE  --> {% block stylesheets %}
+{% load static %}
+<link rel="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css" href="styles.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.3/css/select.dataTables.min.css">
+<link type="text/css" href="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/css/dataTables.checkboxes.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.2.6/css/fileinput-rtl.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.2.6/css/fileinput.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.css">
+<link rel="stylesheet" href="{% static 'assets/css/manage-style.css' %}">
+<style>
+    div.file-footer-buttons{
+    display: none;
+    }
+    button.fileinput-remove-button{
+    background-color:#F25A62 !important;
+    }
+    div>select{
+    width:100% !important;
+    }
+</style> {% endblock stylesheets %} {% block content %}<div class="content">
+    <div class="page-inner">
+      <div class="page-header">
+        <div class="mr-2">
+          <h1 class="fw-bold m-0">Product</h1>
+          <h3 class="text-dark op-8 mt-0">Manage Product</h3>
+        </div>
+        <ul class="breadcrumbs card mt-2 p-3 mb-0">
+          <li class="nav-home">
+            <a href="{% url 'home' %}"> Dashboard </a>
+          </li>
+          <li class="separator">
+            <i class="flaticon-right-arrow"></i>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'manage-product' %}" class="badge badge-secondary text-light">Product (Manage Product)</a>
+          </li>
+        </ul>
+      </div>
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="card p-3">
+            <div class="d-flex align-items-center">
+              <span class="stamp stamp-md bg-dark mr-3 rounded-circle">
+                <i class="fas fa-boxes text-white"></i>
+              </span>
+              <div>
+                <h5 class="mb-1">
+                  <b>Store Product(s)</b>
+                </h5>
+                <small class="text-muted">
+                  <a id="productCount"></a> registered </small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-3">
+                <div class="mt-3 mb-0 card card-dark bg-secondary-gradient">
+                  <div class="card-body pb-0">
+                    <div id="newDate" class="badge badge-light fw-bold float-right"></div>
+                    <h2 id="newProducts"></h2>
+                    <p>New Product(s)</p>
+                    <div class="pull-in sparkline-fix chart-as-background">
+                      <div id="productlineChart"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="mt-3 mb-0 card card-dark bg-success-gradient">
+                  <div class="card-body pb-0">
+                    <h1 id="SuffStock"></h1>
+                    <p>
+                      <i class="fas fa-dolly-flatbed mr-1"></i> Product <span id="OnHand"></span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="mt-3 mb-0 card card-dark bg-warning-gradient">
+                  <div class="card-body pb-0">
+                    <h1 id="NeedReorder"></h1>
+                    <p>
+                      <i class="fas fa-clipboard-list"></i> Critical Stock
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="mt-3 mb-0 card card-dark bg-info-gradient">
+                  <div class="card-body pb-0">
+                    <h1 id="NewProduct"></h1>
+                    <p>
+                      <i class="fas fa-dolly-flatbed mr-1"></i> w/o unit(s)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-header">
+              <div class="d-lg-flex justify-content-between">
+                <div class="btn-group d-md-flex justify-content-center">
+                  <div class="row">
+                    <div class="d-flex">
+                      <div class="btn-group" role="group" aria-label="Basic example">
+                        <button id="export" type="button" class="ml-3 btn border-dark btn-light btn-ripple p-3 " data-toggle="dropdown" aria-expanded="false" onclick="this.blur();" style="cursor:default;">
+                          <i class="fas fa-file-export"></i> Export <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                          <div id="csv" class="dropdown-item"></div>
+                          <div id="pdf" class="dropdown-item"></div>
+                        </div>
+                        <button id="print"></button>
+                        <button id="delete" type="button" class="btn border-dark btn-light btn-ripple" onclick="deleteProduct();" style="cursor:default;">
+                          <i class="fas fa-trash-alt"></i> Delete </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <a id="addProduct" role="button" data-toggle="modal" data-target="#addModal" class="w-100 mt-2 btn btn-success btn-ripple text-white">
+                    <i class="fas fa-plus"></i> Add Product </a>
+                </div>
+              </div>
+            </div>
+            <div class="card mb-0">
+              <div class="card-body border-bottom border-secondary p-2">
+                <div class="d-lg-flex">
+                  <div class="pl-0 pr-4 ml-1 col-12 col-md-5 col-lg-5 form-group">
+                    <form autocomplete="off" class="mt-1 ml-3 mr-md-1">
+                      <div class="input-icon">
+                        <div class="has-clear">
+                          <span class="input-icon-addon">
+                            <span class="fas fa-search"></span>
+                          </span>
+                          <input type="text" id="search" placeholder="Search for..." class="form-control input-sm" size="50%">
+                          <span class="form-control-clear fa fa-times form-control-feedback d-none"></span>
+                        </div>
+                      </div>
+                      <span class="text-secondary">Press Enter to search..</span>
+                    </form>
+                  </div>
+                  <div id="page-length" class="ml-4 ml-lg-0"></div>
+                </div>
+              </div>
+            </div>
+            <div class="pt-0 mt-0 card-body p-2">
+              <div class="pt-0 mt-0 table-responsive">
+                <div class="mt-2 ml-3 badge bg-gray-200">
+                  <b class="mr-2">Quantity: </b>
+                  <b class="mr-2">
+                    <i class="text-green-600 fa fa-circle" aria-hidden="true"></i> - Sufficient Stock </b>
+                  <b class="mr-2">
+                    <i class="text-yellow-500 fa fa-circle" aria-hidden="true"></i> - Place Order </b>
+                  <b class="mr-2">
+                    <i class="text-info fa fa-circle" aria-hidden="true"></i> - New Product </b>
+                </div>
+                <div class="mt-2 ml-3 badge bg-warning text-light">
+                  <b>
+                    <i class="fas fa-edit" aria-hidden="true"></i> - Edit Product </b>
+                </div>
+                <div class="mt-2 ml-1 badge bg-info text-light">
+                  <b>
+                    <i class="fas fa-layer-group" aria-hidden="true"></i> - Edit Stock </b>
+                </div>
+                <table id="basic-datatables" class="table-loader display responsive table shadow">
+                  <thead>
+                    <tr class="bg-dark text-light">
+                      <th class="all"></th>
+                      <th class="all">ID</th>
+                      <th class="all">Image</th>
+                      <th class="all">Name</th>
+                      <th class="all">Brand</th>
+                      <th class="mobile-p">Description</th>
+                      <th class="mobile-p">Category</th>
+                      <th class="mobile-p">Supplier</th>
+                      <th class="mobile-p">Reorder Level Quantity</th>
+                      <th class="all">Quantity</th>
+                      <th class="all">Remarks</th>
+                      <th class="all">Purchase Price</th>
+                      <th class="all">Retail Price</th>
+                      <th class="mobile-p">Created Date</th>
+                      <th class="never">Category_Id</th>
+                      <th class="never">Supplier_Id</th>
+                      <th class="all">Edit</th>
+                      <th class="all"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="basic-datatables-body"></tbody>
+                </table>
+              </div>
+              <div id="pagination-card" class="mt-2 d-flex justify-content-center"></div>
+              <div id="info-card" class="d-flex justify-content-center mb-4"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal animated slideInUp" id="editstock" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel">Edit Stock</h2>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form id="editform1" method="post" autocomplete="off"> {% csrf_token %} <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                      <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                        <div class="container">
+                          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                            <div class="mb-2 panel panel-default">
+                              <div class="panel-heading" role="tab" id="headingOne">
+                                <h4 class="panel-title">
+                                  <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    <i class="fas fa-money-bill"></i> Price Adjustment </a>
+                                </h4>
+                              </div>
+                              <div id="collapseOne" class="panel-collapse collapse show" role="tabpanel" aria-labelledby="headingOne">
+                                <div class="panel-body">
+                                  <div class="form-group">
+                                    <label for="id" class="placeholder">Id <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" id="id" name="id" class="form-control" readonly>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="purch_price" class="placeholder">Purchase Price <span class="text-danger">*</span>
+                                    </label> {{ form1.purch_price }}
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="retail_price" class="placeholder">Retail Price <span class="text-danger">*</span>
+                                    </label> {{ form1.retail_price }}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="mb-2 panel panel-default">
+                              <div class="panel-heading" role="tab" id="headingTwo">
+                                <h4 class="panel-title">
+                                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                                    <i class="fas fa-tasks"></i> Stock Entry/ Adjustment </a>
+                                </h4>
+                              </div>
+                              <div id="collapseTwo" class="panel-collapse collapse show" role="tabpanel" aria-labelledby="headingTwo">
+                                <div class="panel-body">
+                                  <div class="form-group">
+                                    <label for="id" class="placeholder">Initial Quantity </label>
+                                    <input type="text" id="init_qty" name="init_qty" class="form-control" readonly>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="id" class="placeholder">Quantity (Adjustment) </label>
+                                    <input type="number" id="qty_adj" name="qty_adj" class="form-control" min="0" max="9999" required>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="qty" class="placeholder">Final Quantity </label> {{ form1.qty }}
+                                  </div>
+                                  <div class="form-group">
+                                    <div class="form-control">
+                                      <label for="adjustment" class="placeholder border-bottom w-100 border-danger">Action <span class="text-danger">*</span>
+                                      </label>
+                                      <select id="adjustment" class="form-select" data-parsley-required="true">
+                                        <option value="None">---------</option>
+                                        <option value="Stock-In">Add to Inventory</option>
+                                        <option value="Stock-Pull-Out">Pull-Out from the Inventory</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="remarks" class="placeholder">Remarks <small>(Optional)</small>
+                                    </label> {{ form1.remarks }}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                            <div class="mb-2 panel panel-default">
+                              <div class="panel-heading" role="tab" id="headingOne">
+                                <h4 class="panel-title">
+                                  <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+                                    <i class="fas fa-pen"></i> Reorder Level Adjustment </a>
+                                </h4>
+                              </div>
+                              <div id="collapseThree" class="panel-collapse collapse show" role="tabpanel" aria-labelledby="headingOneThree">
+                                <div class="form-group">
+                                  <label for="reorder_qty" class="placeholder">Reorder Level <span class="text-danger">*</span>
+                                  </label> {{ form1.reorder_qty }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-success btn-ripple">Submit</button>
+                    <button type="button" id="clear2" class="btn btn-danger btn-ripple">Clear</button>
+                    <button id="cancel" type="button" class="btn bg-gray-500 text-white btn-ripple" data-dismiss="modal">Cancel</button>
+                  </div>
+              </div>
+            </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal animated slideInUp" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title" id="exampleModalLabel">Edit Product</h2>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="editform" method="post" enctype="multipart/form-data" autocomplete="off"> {% csrf_token %} <div class="row">
+                <div class="col-md-12 col-lg-12">
+                  <div class="form-group">
+                    <label for="id" class="placeholder">Id <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" id="id" name="id" class="form-control" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label for="img" class="placeholder">Image <small>(optional)</small>
+                    </label> {{ form.img }}
+                  </div>
+                  <div class="form-group">
+                    <label for="name" class="placeholder">Name <span class="text-danger">*</span>
+                    </label> {{ form.name }}
+                  </div>
+                  <div class="form-group">
+                    <label for="brand" class="placeholder">Brand <span class="text-danger">*</span>
+                    </label> {{ form.brand }}
+                  </div>
+                  <div class="form-group">
+                    <label for="description" class="placeholder">Description <span class="text-danger">*</span>
+                    </label> {{ form.description }}
+                  </div>
+                  <div class="form-group">
+                    <div class="form-control category">
+                      <label for="category" class="placeholder border-bottom w-100 border-danger">Category <span class="text-danger">*</span>
+                      </label> {{ form.category }}
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="form-control supplier">
+                      <label for="supplier" class="placeholder border-bottom w-100 border-danger">Supplier <span class="text-danger">*</span>
+                      </label> {{ form.supplier }}
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-success btn-ripple">Submit</button>
+                    <button type="button" id="clear1" class="btn btn-danger btn-ripple">Reset</button>
+                    <button id="cancel" type="button" class="btn bg-gray-500 text-white btn-ripple" data-dismiss="modal">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="modal animated slideInUp" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title" id="exampleModalLabel">Add Product</h2>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="addform" method="post" autocomplete="off" enctype="multipart/form-data" data-parsley-validate> {% csrf_token %} <div class="row">
+                <div class="col-md-12 col-lg-12">
+                  <div class="form-group">
+                    <label for="img" class="placeholder">Image <small>(optional)</small>
+                    </label> {{ form.img }}
+                  </div>
+                  <div class="form-group">
+                    <label for="name" class="placeholder">Name <span class="text-danger">*</span>
+                    </label> {{ form.name }}
+                  </div>
+                  <div class="form-group">
+                    <label for="brand" class="placeholder">Brand <span class="text-danger">*</span>
+                    </label> {{ form.brand }}
+                  </div>
+                  <div class="form-group">
+                    <label for="description" class="placeholder">Description <span class="text-danger">*</span>
+                    </label> {{ form.description }}
+                  </div>
+                  <div class="form-group">
+                    <div class="form-control category">
+                      <label for="category" class="border-bottom w-100 border-danger placeholder">Category <span class="text-danger">*</span>
+                      </label> {{ form.category }}
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="form-control supplier">
+                      <label for="supplier" class="border-bottom w-100 border-danger placeholder">Supplier <span class="text-danger">*</span>
+                      </label> {{ form.supplier }}
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-success btn-ripple">Submit</button>
+                    <button type="button" id="clear" class="btn btn-danger btn-ripple">Clear</button>
+                    <button id="cancel" type="button" class="btn bg-gray-500 text-white btn-ripple" data-dismiss="modal">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div> {% endblock content %}
+<!-- Specific Page JS goes HERE  --> {% block javascripts %} <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.2.6/js/fileinput.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.11.3/dataRender/datetime.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.10.21/dataRender/datetime.js"></script>
+<script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+<script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/js/dataTables.checkboxes.min.js"></script>
+<script>
+var table;
+var groupColumn = 7;
+var init_qty, qty_adj, adj;
+$(document).ready(function() {
+	$('#editform1').find("#qty_adj").keyup(function() {
+		$("#editform1").find("ul.parsley-errors-list").remove();
+		$('#editform1').parsley().reset();
+		var init_qty = $('#editform1').find('#init_qty').val();
+		var qty_adj = $('#editform1').find('#qty_adj').val();
+		var adj = $('#editform1').find('#adjustment option:selected').val();
+		var final_qty;
+		if (qty_adj != "") {
+			if (adj == "Stock-In") {
+				final_qty = Number(init_qty) + Number(qty_adj);
+			} else if (adj == "Stock-Pull-Out") {
+				final_qty = Number(init_qty) - Number(qty_adj);
+			} else {
+				final_qty = init_qty;
+			}
+			$('#editform1').find('#qty').val(final_qty);
+		} else {
+			$('#editform1').find('#qty').val(init_qty);
+		}
+	});
+
+	$('#editform1').find("#adjustment").click(function() {
+		$("#editform1").find("ul.parsley-errors-list").remove();
+		$('#editform1').parsley().reset();
+		var init_qty = $('#editform1').find('#init_qty').val();
+		var qty_adj = $('#editform1').find('#qty_adj').val();
+		var adj = $('#editform1').find('#adjustment option:selected').val();
+		var final_qty;
+		if (qty_adj != "") {
+			if (adj == "Stock-In") {
+				final_qty = Number(init_qty) + Number(qty_adj);
+			} else if (adj == "Stock-Pull-Out") {
+				final_qty = Number(init_qty) - Number(qty_adj);
+			} else {
+				final_qty = init_qty;
+			}
+
+			$('#editform1').find('#qty').val(final_qty);
+		} else {
+			$('#editform1').find('#qty').val(init_qty);
+		}
+
+		$('#editform1').find('#qty').val(final_qty);
+	});
+
+	lightbox.option({
+		'resizeDuration': 500,
+		'wrapAround': true,
+		'disableScrolling': true,
+		'fitImagesInViewport': true
+	})
+
+	var col_reorder_qty = 0;
+	table = $('#basic-datatables').DataTable({
+		"order": [
+			[6, "asc"]
+		],
+		bServerSide: true,
+		"lengthMenu": [
+			[10, 25, 50, 100, 500, 999999],
+			[10, 25, 50, 100, 500, "All"]
+		],
+		"pageLength": 999999,
+		sAjaxSource: "{% url 'product-list' %}",
+		columns: [{
+				name: "checkbox",
+				data: 8,
+				defaultContent: ""
+			},
+			{
+				name: "id",
+				data: 0
+			},
+			{
+				name: "image",
+				data: 1,
+				"render": function(data, type, row) {
+					if (data == null || data=='') {
+						return '<a><img src="{% static 'assets/img/no_image.png' %}" alt="image" width="80" height="80"></a>'
+					} else {
+						var path = data.split('manage/product/');
+						return '<a href="{{ cloudinary_url }}'+ path[0] + '" data-lightbox="profile"><img src="{{ cloudinary_url }}' + path[0] + '"alt="image" class="img-thumbnail" width="80" height="80"></a>'
+					}
+				}
+			},
+			{
+				name: "name",
+				data: 2
+			},
+			{
+				name: "brand",
+				data: 3
+			},
+			{
+				name: "description",
+				data: 4
+			},
+			{
+				name: "category",
+				data: 5
+			},
+			{
+				name: "supplier",
+				data: 6
+			},
+			{
+				name: "reorder_qty",
+				data: 8,
+				"render": function(data, type, row) {
+					if(data==0){
+						col_reorder_qty = 0;
+						return '0'
+					}
+					else if (data==null) {
+						col_reorder_qty = 0;
+						return '0'
+					} else {
+						col_reorder_qty = data;
+						return data
+					}
+				},
+			},
+			{
+				name: "qty",
+				data: 7,
+				"render": function(data, type, row) {
+					if (data==null) {
+                        return '<h5 class="badge-pill bg-info text-light text-center">0</h5>'
+					}else if (col_reorder_qty == 0) {
+						return '<h5 class="badge-pill bg-yellow-500 text-light text-center">0</h5>'}
+					else if ((data <= col_reorder_qty)) {
+						return '<h5 class="badge-pill bg-yellow-500 text-light text-center">' + data + '</h5>'
+                    } else {
+						return '<h5 class="badge-pill bg-green-600 text-light text-center">' + data + '</h5>'
+					}
+				},
+			},
+			{
+				name: "remarks",
+				data: 7,
+				"render": function(data, type, row) {
+					if (data==null) {
+                        return '<h5 class="badge-pill bg-info text-light text-center">New Product</h5>'
+                    }else if (col_reorder_qty == 0) {
+						return '<h5 class="badge-pill bg-yellow-500 text-light text-center">Place Order</h5>'}
+					 else if ((data <= col_reorder_qty)) {
+						return '<h5 class="badge-pill bg-yellow-500 text-light text-center">Place Order</h5>'
+					} else {
+						return '<h5 class="badge-pill bg-green-600 text-light text-center">Sufficient Stock</h5>'
+					}
+				},
+			},
+			{
+				name: "purch_price",
+				data: 9,
+				"render": function(data, type, row) {
+					if ((!data) || (data == 0)) {
+						return '<div class="container text-center">0</div>'
+					} else {
+						return '<div class="container text-center">' + (Number(data).toFixed(2)).toLocaleString() + '</div>'
+					}
+				},
+			},
+			{
+				name: "retail_price",
+				data: 10,
+				"render": function(data, type, row) {
+					if ((!data) || (data == 0)) {
+						return '<div class="container text-center">0</div>'
+					} {
+						return '<div class="container text-center">' + (Number(data).toFixed(2)).toLocaleString() + '</div>'
+					}
+				},
+			},
+			{
+				name: "created_date",
+				data: 11
+			},
+			{
+				name: "category_id",
+				data: 12
+			},
+			{
+				name: "supplier_id",
+				data: 13
+			},
+			{
+				name: "edit",
+				data: 0,
+				"render": function(data, type, row) {
+					return '<div class="btn-group d-md-flex justify-content-center"><button id="product-' + data + '" class="btn btn-warning btn-ripple pl-2 pr-2 p-2" type="button" data-toggle="modal" data-target="#editModal" onclick=editProduct("#product-' + data + '");>' +
+						'<i class="fas fa-edit"></i>' +
+						'</button><button id="stock-' + data + '" class="btn btn-info btn-ripple pl-2 pr-2 p-2" type="button" data-toggle="modal" data-target="#editstock" onclick=editStock("#stock-' + data + '");><i class="fas fa-layer-group"></i></button></div>'
+				}
+			},
+			{
+				name: "details-control",
+				data: null,
+				defaultContent: ""
+			},
+		],
+		responsive: {
+			details: {
+				type: 'column',
+				target: -1
+			}
+		},
+		autoWidth: false,
+		columnDefs: [{
+				width: "1%",
+				targets: [0],
+				'checkboxes': {
+					'selectRow': true
+				}
+			},
+			{
+				width: "8%",
+				targets: [1],
+				orderData: [0]
+			},
+			{
+				width: "10%",
+				targets: [2],
+				orderData: [1]
+			},
+			{
+				width: "18%",
+				targets: [3],
+				orderData: [2]
+			},
+			{
+				targets: [6]
+			},
+			{
+
+				targets: [7],
+				orderData: [6],
+				visible: "false",
+			},
+			{
+				width: "4%",
+				targets: [8],
+				orderData: [7],
+			},
+			{
+				width: "4%",
+				targets: [9],
+				orderData: [8],
+			},
+			{
+				width: "13%",
+				targets: [10],
+				orderData: [9],
+			},
+			{
+				width: "4%",
+				targets: [11],
+				orderData: [10],
+			},
+			{
+				width: "4%",
+				targets: [12],
+				orderData: [11],
+			},
+			{
+				targets: [13],
+				render: function(data, type, row) {
+					return moment(data).format('DD MMM YYYY hh:mm a');
+				}
+			},
+			{
+				targets: [14],
+				width: "4%",
+			},
+
+			{
+				className: 'dtr-control',
+				orderable: false,
+				targets: -1
+			},
+			{
+				width: "5%",
+				targets: [15],
+				visible: "false",
+			},
+			{
+				width: "4%",
+				targets: [16],
+				visible: "false",
+			},
+		],
+		select: {
+			style: 'multi',
+			selector: 'tr td:first-child',
+			info: false
+		},
+		buttons: {
+			buttons: [{
+					extend: 'print',
+					className: '',
+					text: 'Print',
+					exportOptions: {
+						columns: [1, 3, 4, 6, 7, 8, 9, 10, 11, 12],
+						rows: {
+							selected: true
+						},
+						title: "Hisher General Merchandise<br>Prouct List",
+					},customize: function (win) {
+							$(win.document.body).find('table').addClass('display').css('font-size', '9px');
+							$(win.document.body).find('tfoot').each(function(index){
+								$(this).find('th:nth-child(1)').html('');
+								$(this).find('th:nth-child(2)').html('');
+								$(this).find('th:nth-child(3)').html('');
+								$(this).find('th:nth-child(4)').html('');
+								$(this).find('th:nth-child(5)').html('');
+								$(this).find('th:nth-child(8)').html('');
+								$(this).find('th:nth-child(9)').html('');
+							});
+							$(win.document.body).find('h1').css('text-align','center');
+							var last = null;
+							var current = null;
+							var bod = [];
+			
+							var css = '@page { size: landscape; }',
+								head = win.document.head || win.document.getElementsByTagName('head')[0],
+								style = win.document.createElement('style');
+			
+							style.type = 'text/css';
+							style.media = 'print';
+			
+							if (style.styleSheet)
+							{
+							style.styleSheet.cssText = css;
+							}
+							else
+							{
+							style.appendChild(win.document.createTextNode(css));
+							}
+			
+							head.appendChild(style);
+					}
+				},
+				{
+					extend: 'csv',
+					className: 'btn',
+					exportOptions: {
+						stripHtml: true,
+						columns: [1, 3, 4, 6, 7, 8, 9, 10, 11, 12],
+						rows: {
+							selected: true
+						}
+					}
+				},
+				{
+					extend: 'pdfHtml5',
+					className: 'btn',
+					orientation: 'landscape',
+					pageSize : 'A3',
+					exportOptions: {
+						orthogonal: 'export',
+						columns: [1, 3, 4, 6, 7, 8, 9, 10, 11, 12],
+						rows: {
+							selected: true
+						}
+					},
+					customize: function(doc) {
+						doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+						doc.defaultStyle.alignment = 'center';
+						doc.styles.tableHeader.alignment = 'center';
+					},
+				}
+			]
+		},
+		dom: "<'row p-2 mb-0'<'col-lg-12' l B>>" +
+			"<'row'<'col-lg-12'tr>>" +
+			"<'row p-2'<'col-lg-5'i><'col-lg-7'p>>",
+		initComplete: function(settings, json) {
+
+			$('#export').attr('disabled', 'disabled');
+			$('.buttons-print').attr('disabled', 'disabled');
+			$('#delete').attr('disabled', 'disabled');
+
+			$(".buttons-print").appendTo("#print");
+
+			$(".buttons-print").addClass("btn border-dark btn-light btn-ripple p-3 rounded-0 h-100");
+			$(".buttons-csv").appendTo("#csv");
+			$(".buttons-pdf").appendTo("#pdf");
+			$(".select-info .select-item:nth-child(1)").addClass("badge badge-primary text-light");
+
+			$("#basic-datatables_length").appendTo("#page-length");
+			$("#basic-datatables_paginate").appendTo("#pagination-card");
+			$("#basic-datatables_info").appendTo("#info-card");
+			$('.buttons-print').html('<i class="fas fa-print"></i> Print');
+
+			$("#productCount").html(this.fnSettings().fnRecordsTotal());
+
+		},
+		"drawCallback": function(settings) {
+			var api = this.api();
+			var rows = api.rows({
+				page: 'current'
+			}).nodes();
+			var last = null;
+			api.column(groupColumn, {
+				page: 'current'
+			}).data().each(function(group, i) {
+				if (last !== group) {
+					$(rows).eq(i).before(
+						'<tr class="group bg-gray-300"><td colspan="11" class="text-center"><i class="fa fa-industry" aria-hidden="true"></i> Supplier - <b>' + group + '</b></td></tr>'
+					);
+
+					last = group;
+				}
+			});
+			$(function() {
+				$.ajax({
+					type: "GET",
+					url: "{% url 'product-graph' %}",
+					success: function(data) {
+						var arr = [];
+						var total = 0;
+						$.each(data.cdc, function(key, value) {
+							total = total + value;
+							arr.push(total);
+						});
+
+						$('#productlineChart').sparkline(arr, {
+							type: 'line',
+							height: '70',
+							width: '100%',
+							lineWidth: '2',
+							lineColor: 'rgba(255, 255, 255, .5)',
+							fillColor: 'rgba(255, 255, 255, .15)'
+						});
+						if (data.count != 0) {
+							$('#newDate').html("As of " + moment(data.date[data.date.length - 1]).format('MMMM DD,YYYY'));
+							$('#newProducts').html(data.cdc[data.cdc.length - 1]);
+							$("#productCount").html(data.count);
+						} else {
+							$('#newDate').html("As of " + moment(data.date[data.date.length - 1]).format('MMMM DD,YYYY'));
+							$('#newProducts').html("0");
+							$("#productCount").html(data.count);
+						}
+
+						if (data.total_on_hand != 0) {
+							$('#OnHand').html(": " + data.total_on_hand['qty__sum'] + " <small>on-hand unit(s)</small>");
+						} else {
+							$('#OnHand').html(": 0 <small>on-hand unit(s)</small>");
+						}
+
+						if (data.suff_stock != 0) {
+							$('#SuffStock').html(data.suff_stock + " <small>sufficient product(s)</small>");
+						} else {
+							$('#SuffStock').html("0 <small>sufficient  product(s)</small>");
+						}
+
+						if (data.need_reorder != 0) {
+							$('#NeedReorder').html(data.need_reorder + " <small>product(s)</small>");
+						} else {
+							$('#NeedReorder').html("0 <small>product(s)</small>");
+						}
+
+						if (data.new_product != 0) {
+							$('#NewProduct').html(data.new_product + " <small>product(s)</small>");
+						} else {
+							$('#NewProduct').html("0 <small>product(s)</small>");
+						}
+
+
+					}
+				});
+
+			});
+
+			var searchCount = table.rows({
+				search: 'applied'
+			}).count()
+			if (searchCount < 1) {
+				$('#export').attr('disabled', 'disabled');
+				$('#delete').attr('disabled', 'disabled');
+				$('#delete').removeClass('btn-danger');
+				$('#delete').addClass('btn-light');
+				$('.buttons-print').attr('disabled', 'disabled');
+				$('.buttons-print').html('<i class="fas fa-print"></i> Print');
+				$('#delete').html('<i class="fas fa-trash-alt"></i> Delete');
+			}
+
+		}
+
+	});
+	// row group sorting 
+	$('#basic-datatables tbody').on('click', 'tr.group td', function() {
+		var currentOrder = table.order()[0];
+		if (currentOrder[0] === groupColumn && currentOrder[1] === 'asc') {
+			table.order([groupColumn, 'desc']).draw();
+		} else {
+			table.order([groupColumn, 'asc']).draw();
+		}
+	});
+
+
+	table.on( 'draw.dt', function() {
+		setTimeout(function(){
+			NProgress.done();
+	   $("#basic-datatables").removeClass('table-loader').show();
+	}, 400);});
+	table.on( 'preDraw', function () {	
+		NProgress.start();
+		  $("#basic-datatables").addClass('table-loader').show();
+	} );
+
+	table.on("select deselect", function() {
+		selectedRows = table.rows({
+			selected: true
+		}).count();
+		if (selectedRows < 1) {
+			$('#export').attr('disabled', 'disabled');
+			$('#delete').attr('disabled', 'disabled');
+			$('#delete').removeClass('btn-danger');
+			$('#delete').addClass('btn-light');
+			$('.buttons-print').attr('disabled', 'disabled');
+			$('.buttons-print').html('<i class="fas fa-print"></i> Print');
+			$('#delete').html('<i class="fas fa-trash-alt"></i> Delete');
+
+		} else {
+			rselected = table.rows('.selected').data();
+			$('#export').removeAttr('disabled');
+			$('#delete').removeAttr('disabled');
+			$('#delete').addClass('btn-danger');
+			$('#delete').removeClass('btn-light');
+			$('.buttons-print').removeAttr('disabled');
+			$('.buttons-print').html('<i class="fas fa-print"></i> Print <span class="badge badge-success text-light">' + selectedRows + '</span> selected row(s)');
+			$('#delete').html('<i class="fas fa-trash-alt"></i> Delete <span class="badge badge-light text-danger">' + selectedRows + '</span> selected row(s)');
+		}
+	});
+
+	$('#search').keypress(function(e) {
+		if (e.which == 13) {
+			e.preventDefault()
+			table.search($(this).val()).draw();
+		}
+	});
+	$('#search').keyup(function(e) {
+		if (e.which == 8) {
+			e.preventDefault()
+			table.search($(this).val()).draw();
+		}
+	});
+	var selectedRows = 0;
+
+	$(".alert-del").click(function() {
+		$(this).parent().addClass('hidden');
+	});
+	$("#clear").click(function() {
+		$('#addform').find('.fileinput-remove').click();
+		$('#addform').trigger("reset");
+		$("#addform").find("ul.parsley-errors-list").remove();
+		$('#addform').parsley().reset();
+	});
+	$("#clear1").click(function() {
+		$('#editform').find('.fileinput-remove').click();
+		$('#editform').find('#name').val(name);
+		$('#editform').find('#brand').val(brand);
+		$('#editform').find('#description').val(description);
+
+		$('#editform').find('div.category option:selected').removeAttr('selected');
+		$('#editform').find('div.supplier option:selected').removeAttr('selected');
+
+		$("#editform").find("ul.parsley-errors-list").remove();
+		$('#editform').parsley().reset();
+
+		$('#editform').find('div.category option[value="' + category + '"]').prop('selected', true);
+		$('#editform').find('div.supplier option[value="' + supplier + '"]').prop('selected', true);
+
+	});
+	$("#clear2").click(function() {
+		$('#editform1').find('.fileinput-remove').click();
+		$("#editform1").find("ul.parsley-errors-list").remove();
+		$('#editform1').find('#init_qty').val(init_qty);
+		$('#editform1').find('#qty_adj').val(qty_adj);
+		$('#editform1').find('#reorder_qty').val(reorder_qty);
+		$('#editform1').find('adj').val(adj);
+		$('#editform1').find('#retail_price').val(retail_price);
+		$('#editform1').find('#purch_price').val(purch_price);
+		$('#editform1').find('#remarks').val('');
+		$('#editform1').find('#qty').val(init_qty);
+		$('#editform1').find('#adjustment option[value="None"]').prop('selected', true);
+		$('#editform1').parsley().reset();
+	});
+	$("#addProduct").click(function(e) {
+		e.preventDefault();
+		$("#clear").click();
+	});
+	$("#addform").submit(function(e) {
+		e.preventDefault();
+		if (confirm('Are you sure you want to add this information to the database?')) {
+			// preventing default actions
+			// serialize the data for sending the form data.
+			$('#ajax-loader').addClass('loading').show();
+			var serializedData = new FormData(this);
+			// Ajax Call
+			$.ajax({
+				type: 'POST',
+				url: "{% url 'insert-product' %}",
+				data: serializedData,
+				processData: false,
+				contentType: false,
+				// handle a successful response
+				success: function(response) {
+					// On successful, clear all form data
+					$('#ajax-loader').removeClass('loading').hide();
+					$("#addModal").find("#name").blur();
+					$("#addModal").find("#description").blur();
+					$("#addModal").find("#qty").blur();
+					$("#addModal").find("#price").blur();
+					$("#addform").find("#clear").click();
+					table.ajax.reload();
+					swal("Success!", JSON.stringify('Product was succesfully added in the database!'), {
+						icon: "success",
+						buttons: {
+							confirm: {
+								className: 'btn btn-success'
+							}
+						},
+					});
+				},
+				error: function(response) {
+					// alert non successful response
+					$('#ajax-loader').removeClass('loading').hide();
+					swal("Error!", JSON.stringify(response["responseJSON"]["error"]), {
+						icon: "error",
+						buttons: {
+							confirm: {
+								className: 'btn btn-danger'
+							}
+						},
+					});
+				}
+			});
+		}
+	});
+
+	$('#addform').parsley();
+	$('#editform').parsley();
+	$('#editform1').parsley();
+
+	$("#editform").submit(function(e) {
+		e.preventDefault();
+		if (confirm('Are you sure you want to update this information to the database?')) {
+			// preventing default actions
+			$('#ajax-loader').addClass('loading').show();
+			var serializedData = new FormData(this);
+			// Ajax Call
+			$.ajax({
+				type: 'POST',
+				url: "{% url 'update-product' %}",
+				data: serializedData,
+				processData: false,
+				contentType: false,
+				// handle a successful response
+				success: function(response) {
+					// On successful, clear all form data
+					$('#ajax-loader').removeClass('loading').hide();
+					$("#editModal").find("#name").blur();
+					$("#editModal").find("#description").blur();
+					$("#editModal").find("#qty").blur();
+					$("#editModal").find("#price").blur();
+					table.ajax.reload();
+					id = $("#editform").find("#id").val();
+					name = $("#editform").find("#name").val();
+					brand = $("#editform").find("#brand").val();
+					description = $("#editform").find("#description").val();
+					category = $('#editform').find('div.category :selected').val();
+					supplier = $('#editform').find('div.supplier :selected').val();
+					swal("Success!", JSON.stringify('Product was succesfully updated in the database!'), {
+						icon: "success",
+						buttons: {
+							confirm: {
+								className: 'btn btn-success'
+							}
+						},
+					});
+				},
+				error: function(response) {
+					// alert non successful response
+					$('#ajax-loader').removeClass('loading').hide();
+					swal("Error!", JSON.stringify(response["responseJSON"]["error"]), {
+						icon: "error",
+						buttons: {
+							confirm: {
+								className: 'btn btn-danger'
+							}
+						},
+					});
+				}
+			});
+		}
+	});
+
+	$("#editform1").submit(function(e) {
+		e.preventDefault();
+		var f_qty = $("#editform1").find("#qty_adj").val();
+		var f_adj = $('#editform1').find('#adjustment option:selected').val();
+
+		if (f_qty != "0" && f_adj == "None") {
+			swal("Error!", "Please select an adjusment type", {
+				icon: "error",
+				buttons: {
+					confirm: {
+						className: 'btn btn-danger'
+					}
+				},
+			});
+		} else {
+			if (confirm('Are you sure you want to update this stock to the database?')) {
+				// preventing default actions
+				$('#ajax-loader').addClass('loading').show();
+				var serializedArray = $(this).serializeArray();
+				serializedArray.push({
+					name: 'qty_adj',
+					value: $("#editform1").find("#qty_adj").val()
+				}, {
+					name: 'adjustment',
+					value: $('#editform1').find('#adjustment option:selected').val()
+				}, {
+					name: 'purch_price',
+					value: $("#editform1").find("#purch_price").val()
+				}, {
+					name: 'retail_price',
+					value: $("#editform1").find("#retail_price").val()
+				}, {
+					name: 'prev_qty',
+					value: $("#editform1").find("#init_qty").val()
+				});
+				$.ajax({
+					type: 'POST',
+					url: "{% url 'update-stock' %}",
+					data: serializedArray,
+					// handle a successful response
+					success: function(data) {
+						// On successful, clear all form data
+						$('#ajax-loader').removeClass('loading').hide();
+						$("#editstock").find("#qty").blur();
+						$("#editstock").find("#retail_price").blur();
+						$("#editstock").find("#purch_price").blur();
+						table.ajax.reload();
+						swal("Success!", JSON.stringify('Stock was succesfully updated in the database!'), {
+							icon: "success",
+							buttons: {
+								confirm: {
+									className: 'btn btn-success'
+								}
+							},
+						});
+						id = $("#editform1").find("#id").val();
+						qty = $("#editform1").find("#qty").val();
+						init_qty = $("#editform1").find("#qty").val();
+						retail_price = $("#editform1").find("#retail_price").val();
+						purch_price = $("#editform1").find("#purch_price").val();
+						reorder_qty = $("#editform1").find("#reorder_qty").val();
+						$('#editform1').find('#adjustment option[value="None"]').prop('selected', true);
+						$('#editform1').find('#qty').val(init_qty);
+						$('#editform1').find('#init_qty').val(init_qty);
+						$('#editform1').find('#qty_adj').val("0");
+						$('#editform1').find('#remarks').val("");
+					},
+					error: function(response) {
+						// alert non successful response
+						$('#ajax-loader').removeClass('loading').hide();
+						swal("Error!", JSON.stringify(response["responseJSON"]["error"]), {
+							icon: "error",
+							buttons: {
+								confirm: {
+									className: 'btn btn-danger'
+								}
+							},
+						});
+					}
+				});
+			}
+		}
+	});
+
+});
+var rselected;
+
+var id, img, name, brand, description, category, supplier;
+
+function editProduct(id) {
+	$("#clear1").click();
+	var $row = $(id).closest("tr");
+	id = $row.find("td:nth-child(2)").text();
+	name = $row.find("td:nth-child(4)").text();
+	brand = $row.find("td:nth-child(5)").text();
+	description = $row.find("td:nth-child(6)").text();
+	category = $row.find("td:nth-child(15)").text();
+	supplier = $row.find("td:nth-child(16)").text();
+
+	$('#editform').find('#id').val(id);
+	$('#editform').find('#img').val(img);
+	$('#editform').find('#name').val(name);
+	$('#editform').find('#brand').val(brand);
+	$('#editform').find('#description').val(description);
+	$('#editform').find('div.category option[value="' + category + '"]').prop('selected', true);
+	$('#editform').find('div.supplier option[value="' + supplier + '"]').prop('selected', true);
+}
+
+var init_qty, retail_price, purch_price, reorder_qty;
+
+function editStock(id) {
+	$("#clear2").click();
+	var $row = $(id).closest("tr");
+	id = $row.find("td:nth-child(2)").text();
+	init_qty = $row.find("td:nth-child(10)").text();
+	reorder_qty = $row.find("td:nth-child(9)").text();
+	retail_price = $row.find("td:nth-child(13)").text();
+	purch_price = $row.find("td:nth-child(12)").text();
+	qty_adj = 0;
+	if ((init_qty == "0") && (retail_price == "0") && (purch_price = "0")) {
+		init_qty = "0";
+		retail_price = "0";
+		purch_price = "0";
+	}
+
+	$('#editform1').find('#qty_adj').val(qty_adj);
+	$('#editform1').find('#id').val(id);
+	$('#editform1').find('#init_qty').val(init_qty);
+	$('#editform1').find('#retail_price').val(retail_price);
+	$('#editform1').find('#purch_price').val(purch_price);
+	$('#editform1').find('#reorder_qty').val(reorder_qty);
+	$('#editform1').find('#qty').val(init_qty);
+}
+
+function deleteProduct() {
+	var rowCount = table.rows({
+		selected: true
+	}).count();
+	if (confirm("Are you sure you want to delete: " + rowCount + " product(s)?")) {
+		$.each(rselected, function() {
+			$.ajax({
+				url: '{% url "delete-product" %}',
+				data: {
+					'id': this[0],
+				},
+				type: "GET",
+				dataType: "json",
+				success: function(data) {
+					if (data.deleted) {
+						table.ajax.reload();
+						$('#export').attr('disabled', 'disabled');
+						$('#delete').attr('disabled', 'disabled');
+						$('#delete').removeClass('btn-danger');
+						$('#delete').addClass('btn-light');
+						$('.buttons-print').attr('disabled', 'disabled');
+						$('.buttons-print').html('<i class="fas fa-print"></i> Print');
+						$('#delete').html('<i class="fas fa-trash-alt"></i> Delete');
+						$.notify({
+							icon: 'flaticon-alarm-1',
+							title: 'Success!',
+							message: 'Product was successfully deleted!',
+						}, {
+							type: 'success',
+							placement: {
+								from: "top",
+								align: "right"
+							},
+							time: 1000,
+						});
+					}
+				},
+				error: function(response) {
+					$.notify({
+						icon: 'flaticon-alarm-1',
+						title: 'Error!',
+						message: JSON.stringify(response["responseJSON"]["error"]),
+					}, {
+						type: 'danger',
+						placement: {
+							from: "top",
+							align: "right"
+						},
+						time: 1000,
+					});
+				}
+			});
+		});
+	}
+}
+
+</script> {% endblock javascripts %}

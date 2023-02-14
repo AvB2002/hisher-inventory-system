@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hisher General Merchandise</title>
+    <link rel="stylesheet" href="{% static 'assets/css/homepage/style.css' %}">
+</head>
+
+<body>
+    <div class="container">
+
+        {% include 'includes/homepage-navigation.html' %}
+    
+    <img src="{% static 'assets/homepage_images/logo.png' %}" class="feature-img">
+
+    <div class="text-box">
+        <p>WELCOME TO</p>
+        <h1>HISHER</h1>
+        <h3>GENERAL MERCHANDISE</h3>
+
+    <div class="row">
+        <a href="{% url 'contact' %}">Contact us</a>
+        <a href="{% url 'about' %}">Learn more about the store &#8594;</a>
+    </div>
+
+    </div>
+
+    {% include 'includes/social-icons.html' %}
+
+    </div>
+</body>
+</html>

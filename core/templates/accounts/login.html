@@ -1,0 +1,111 @@
+
+{% extends "layouts/base-fullscreen.html" %}
+
+{% block title %} Login {% endblock title %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="py-10 mt-2 my-5 col-lg-3 col-md-7">
+        <div class="row">
+            <div class="py-10 mt-3 col-lg-12">
+                <div class="card shadow">
+                    <div class="card-header abstract-pic">
+                        <div class="card-title text-center">
+                            <span class="badge bg-secondary text-white text-xl">
+                                Log-in to your Account
+                            </span>
+                        </div>
+                    </div>
+
+                    <form id= "form_login" method="post" action="">
+                       {% if msg %}
+                            <div id="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                                <strong class="font-bold">Error!</strong>
+                                <span class="block sm:inline">{{ msg | safe }}</span>
+                                <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                                </span>
+                            </div>
+                            {% endif %}
+                        {% csrf_token %}
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12 col-lg-12">
+                                    <div id="form-user" class="form-group m-0 p-0 {% if msg %} has-error has-feedback {% endif %}">
+                                        <label for="username" class="border-bottom border-secondary w-100">Username</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-user-circle"></i>
+                                                </span>
+                                            </div>
+                                            {{ form.username }}
+                                        </div>
+                                    </div>
+
+                                    <div id="form-pass" class="form-group m-0 p-0  {% if msg %} has-error has-feedback {% endif %}">
+                                        <label for="password" class="border-bottom border-secondary w-100">Password </label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-unlock"></i>
+                                                </span>
+                                            </div>
+                                            {{ form.password }}
+                                            <div class="input-group-append">
+                                                <span id="show_hide_password" class="p-2 pt-2 border border-secondary bg-white rounded-right">
+                                                    <i class="mt-1 fa fa-eye-slash" aria-hidden="true" style="cursor:pointer;"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-action m-0 p-2">
+                            <button type="submit" class="btn bg-secondary-gradient text-light rounded-pill w-100 rounded-bottom">Login</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+<script>
+$(document).ready(function(){
+    $("#username").on("input",function(){
+        $("#form-user").removeClass('has-error has-feedback');
+        $("#form-pass").removeClass('has-error has-feedback');
+    });
+    
+    $("#password").on("input",function(){
+        $("#form-user").removeClass('has-error has-feedback');
+        $("#form-pass").removeClass('has-error has-feedback');
+    });
+    
+        $("#show_hide_password i").on('click', function(event) {
+            event.preventDefault();
+            if($('input#password').attr("type") == "text"){
+                $('input#password').attr('type', 'password');
+                $('#show_hide_password i').addClass( "fa-eye-slash" );
+                $('#show_hide_password i').removeClass( "fa-eye" );
+                $('#show_hide_password i').removeClass( "text-secondary" );
+            }else if($('input#password').attr("type") == "password"){
+                $('input#password').attr('type', 'text');
+                $('#show_hide_password i').removeClass( "fa-eye-slash" );
+                $('#show_hide_password i').addClass( "fa-eye text-secondary" );
+            }
+        });
+});
+</script>
+{% endblock javascripts %}
